@@ -1,0 +1,1956 @@
+﻿﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>刘玮琦 · 人机同频 跨界成链</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     方案八·定型版  宣纸白 × 克莱茵兰 × 蒂芙尼蓝
+     8大字双层（实心+描边镂空）· 鼠标dot+ring淡蓝光影
+     ============================================================ */
+  :root {
+    --paper:        #FDFBF7;   /* 主背景 宣纸暖白（更白·98%白+2%暖调） */
+    --paper-1:      #F9F7F1;   /* 卡片纸色 */
+    --paper-2:      #F0ECE0;   /* 分割/装饰 */
+    --paper-3:      #E8E3D6;   /* 边框/阴影 */
+    --paper-ink:    #1D1B16;   /* 主文字 深墨褐 */
+    --paper-ink-soft:#5B5547;
+    --paper-ink-muted:#8A8475;
+
+    --klein:        #002FA7;   /* 克莱茵兰 Klein Blue IKB */
+    --klein-2:      #1E43C4;
+    --klein-soft:   rgba(0,47,167,0.08);
+    --klein-halo:   rgba(0,47,167,0.35);
+
+    --tiffany:      #7CC6C0;   /* 蒂芙尼蓝 */
+    --tiffany-2:    #81D8D0;
+    --tiffany-soft: rgba(124,198,192,0.18);
+    --tiffany-line: rgba(124,198,192,0.55);
+
+    --btn-radius:   12px;
+    --card-radius:  16px;
+    --font-serif:   'Noto Serif SC', 'Songti SC', Georgia, serif;
+    --font-sans:    'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font-serif);
+    background: var(--paper);
+    color: var(--paper-ink);
+    min-height: 100vh; overflow-x: hidden; position: relative; line-height: 1.9;
+    cursor: none;
+  }
+
+  /* 宣纸纹理（更白·泛黄减弱） */
+  body::before {
+    content: ''; position: fixed; inset: 0; z-index: -2; pointer-events: none;
+    background-color: var(--paper);
+    background-image:
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.55  0 0 0 0 0.48  0 0 0 0 0.38  0 0 0 0.055 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"),
+      radial-gradient(ellipse at center, transparent 62%, rgba(220,200,165,0.10) 100%);
+    background-size: 160px 160px, 100% 100%;
+    mix-blend-mode: multiply;
+    opacity: 0.55;
+  }
+  body::after {
+    content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background:
+      radial-gradient(circle at 12% 14%, rgba(0,47,167,0.04) 0%, transparent 50%),
+      radial-gradient(circle at 88% 22%, rgba(124,198,192,0.07) 0%, transparent 55%),
+      radial-gradient(circle at 70% 86%, rgba(0,47,167,0.04) 0%, transparent 52%);
+  }
+
+  /* ========== 顶部进度条 ========== */
+  .progress {
+    position: fixed; top: 0; left: 0; height: 3px; width: 0%; z-index: 9999;
+    background: var(--klein);
+    box-shadow: 0 0 8px var(--klein-halo);
+    transition: width 0.1s linear;
+  }
+
+  /* ========== 自定义鼠标 dot + ring（无大光晕·淡淡蓝光影） ========== */
+  .cursor-dot {
+    position: fixed; top: 0; left: 0; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--klein); pointer-events: none; z-index: 99999;
+    transform: translate(-50%,-50%);
+    box-shadow: 0 0 8px rgba(0,47,167,0.30);
+    transition: width .2s, height .2s, opacity .2s;
+    will-change: transform;
+  }
+  .cursor-ring {
+    position: fixed; top: 0; left: 0; width: 44px; height: 44px; border-radius: 50%;
+    border: 1.5px solid var(--klein); pointer-events: none; z-index: 99999;
+    transform: translate(-50%,-50%);
+    box-shadow: 0 0 14px 2px rgba(0,47,167,0.20);
+    transition: width .35s cubic-bezier(.22,1,.36,1), height .35s cubic-bezier(.22,1,.36,1),
+                border-color .3s, background-color .3s, opacity .2s, box-shadow .3s;
+    will-change: transform;
+  }
+  body.is-hovering .cursor-ring {
+    width: 72px; height: 72px;
+    background: rgba(0,47,167,0.06);
+    border-color: var(--klein-2);
+    box-shadow: 0 0 0 2px rgba(0,47,167,0.05), 0 0 22px rgba(0,47,167,0.18);
+  }
+  body.is-hovering .cursor-dot { width: 0; height: 0; opacity: 0; }
+  @media (hover: none) {
+    body { cursor: auto; }
+    .cursor-dot, .cursor-ring { display: none; }
+  }
+
+  /* ========== 顶部 Banner（保留·名言原文+概述性菜单·半透明毛玻璃） ========== */
+  .banner {
+    position: fixed; top: 3px; left: 0; right: 0; z-index: 50;
+    height: 60px; padding: 0 44px;
+    display: flex; align-items: center; justify-content: space-between;
+    background: rgba(253,251,247,0.45);  /* 半透明·背后内容透出 */
+    backdrop-filter: blur(20px) saturate(1.4); -webkit-backdrop-filter: blur(20px) saturate(1.4);  /* 毛玻璃模糊加强 */
+    border-bottom: 1px solid rgba(124,198,192,0.35);  /* 蒂芙尼蓝半透明底边 */
+    box-shadow: 0 1px 30px rgba(29,27,22,0.06);
+  }
+  .banner .brand {
+    display: flex; align-items: center; gap: 14px;
+    text-decoration: none; color: var(--paper-ink);
+  }
+  .banner .brand .dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--klein);
+    box-shadow: 0 0 10px var(--klein-halo), 0 0 0 4px var(--tiffany-soft);
+  }
+  .banner .brand h6 {
+    font-family: var(--font-serif); font-size: 1rem; font-weight: 700; letter-spacing: 2px;
+  }
+  .banner .motto {
+    font-style: italic; font-size: 0.85rem; color: var(--paper-ink-soft);
+    padding-left: 14px; margin-left: 4px;
+    border-left: 2px solid var(--tiffany);
+    font-family: var(--font-serif); letter-spacing: 0.4px;
+  }
+  .banner .motto strong { color: var(--klein); font-weight: 700; }
+  /* 概述性菜单（覆盖5个板块·锚点跳转） */
+  .banner .nav-right {
+    display: flex; align-items: center; gap: 16px;
+    font-family: var(--font-sans); font-size: 0.84rem; color: var(--paper-ink-soft);
+  }
+  .banner .nav-right a {
+    color: var(--paper-ink-soft); text-decoration: none; font-weight: 500;
+    padding: 4px 10px; border-radius: 6px;
+    transition: all 0.25s;
+  }
+  .banner .nav-right a:hover {
+    color: var(--klein); background: var(--klein-soft);
+  }
+  .banner .nav-right .sep { color: var(--tiffany); font-weight: 700; }
+
+  /* ========== 8大字 双层（实心+描边镂空·参考同学站 liuhao.online） ========== */
+  .big-title {
+    font-family: var(--font-serif);
+    font-weight: 900;
+    text-align: left;  /* 8大字靠左·右侧留空给蝴蝶 */
+    line-height: 0.8;  /* 行紧贴·参考同学站 leading-[0.8] */
+    margin: 0;  /* 不居中·靠左 */
+    display: block;
+    position: relative;
+  }
+  .big-title .row {
+    display: block;
+    letter-spacing: -0.05em;  /* 负间距·字挤一起·参考同学站 tracking-[-0.05em] */
+    font-size: clamp(3.2rem, 14vw, 16rem);  /* 超大字号·参考同学站·小屏下缩小避免占满宽度 */
+    transition: color .35s, -webkit-text-stroke-color .35s, transform .4s cubic-bezier(0.23,1,0.32,1);  /* transform 用于鼠标躲避位移 */
+    will-change: transform;
+  }
+  @media (min-width: 768px) {
+    .big-title .row { font-size: clamp(4rem, 18vw, 16rem); }  /* 桌面端恢复原字号 */
+  }
+  .big-title .row.solid {
+    color: var(--paper-ink);
+    margin-bottom: 16px;  /* mb-4=1rem·两行间距·参考同学站 */
+  }
+  .big-title .row.outline {
+    color: transparent;  /* 完全透明·参考同学站 color:#0000 */
+    -webkit-text-stroke: 1px var(--paper-ink);  /* 1px 细骨架·参考同学站 */
+  }
+  .big-title:hover .row.solid { color: var(--klein); }
+  .big-title:hover .row.outline { -webkit-text-stroke-color: var(--klein); }
+
+  /* 板块内 8大字（小尺寸·用于 01/03/05 板块顶部） */
+  .sec .big-title .row {
+    font-size: clamp(2rem, 6vw, 4.2rem);  /* 板块内稍小但仍参照同学负间距紧凑风格 */
+    letter-spacing: -0.04em;
+    line-height: 0.85;
+  }
+  .sec .big-title .row.solid {
+    margin-bottom: 10px;
+  }
+  .sec .big-title .row.outline {
+    -webkit-text-stroke-width: 1px;
+  }
+
+  /* ========== HERO ========== */
+  .hero {
+    min-height: 100vh; position: relative;
+    padding: 130px 24px 60px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 48px;
+    /* Hero 背景：参考 777/888/999 三张淡蓝偏冷调色块·从极浅淡蓝过渡到青绿·与宣纸白基底融合 */
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 35%, rgba(223,246,248,0.55) 0%, transparent 70%),  /* 999 极浅淡蓝 */
+      radial-gradient(ellipse 60% 50% at 50% 60%, rgba(196,232,235,0.32) 0%, transparent 65%),    /* 888 浅蓝 */
+      radial-gradient(ellipse 40% 35% at 50% 80%, rgba(152,203,203,0.18) 0%, transparent 70%);    /* 777 青绿 */
+  }
+  .hero-top {
+    width: 100%; max-width: 1080px;
+    align-self: stretch;  /* 在 flex column 容器里横向占满·不被 align-items:center 收缩 */
+    text-align: left;  /* 8大字往左对齐·右侧留空给蝴蝶装饰 */
+    position: relative;
+    padding: 20px 0 20px 4vw;  /* 左侧留一点呼吸 */
+  }
+  /* 8大字背后微微透明白色穿插层（云雾般浮在主页背景与字之间·偏左） */
+  .hero-top::before {
+    content: ''; position: absolute; top: 50%; left: 0;
+    transform: translateY(-50%);
+    width: 80%; height: 165%;
+    background:
+      radial-gradient(ellipse 58% 48% at 35% 50%, rgba(255,255,255,0.72) 0%, rgba(255,255,255,0.32) 55%, transparent 78%),
+      radial-gradient(ellipse 52% 42% at 60% 50%, rgba(255,255,255,0.62) 0%, rgba(255,255,255,0.28) 58%, transparent 80%),
+      radial-gradient(ellipse 75% 38% at 50% 52%, rgba(253,251,247,0.48) 0%, transparent 75%);
+    z-index: -1; pointer-events: none;
+    filter: blur(6px);
+    border-radius: 40% / 55%;
+  }
+  .hero-frame {
+    border: 1px solid var(--tiffany-line);
+    border-radius: var(--card-radius);
+    padding: 50px 48px 38px;
+    background: rgba(253,251,247,0.55);
+    backdrop-filter: blur(6px);
+    box-shadow: inset 0 0 0 12px var(--paper), inset 0 0 0 13px var(--tiffany-soft),
+                0 24px 60px rgba(29,27,22,0.08);
+    max-width: 720px; width: 100%;
+    text-align: center; position: relative;
+  }
+  .hero-frame .avatar {
+    width: 120px; height: 120px; border-radius: 50%; margin: 0 auto 22px;
+    background: var(--paper); padding: 3px;
+    box-shadow: 0 0 0 3px var(--tiffany-soft), 0 12px 30px rgba(29,27,22,0.10);
+    border: 1px solid var(--tiffany-line);
+    position: relative; overflow: visible;  /* visible·让科技星星光环溢出右上侧 */
+  }
+  .hero-frame .avatar::before {
+    /* 圆形淡蓝光晕·范围小·不超出头像太多 */
+    content: ''; position: absolute; inset: -6%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(124,198,192,0.22) 0%, rgba(0,47,167,0.10) 60%, transparent 80%);
+    z-index: -1;
+  }
+  .hero-frame .avatar img {
+    width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block;
+    background: var(--paper-1); border: 2px solid var(--paper);
+  }
+  /* ========== 科技风星星光环·包围整个头像圆环·会转动 ========== */
+  .hero-frame .avatar .tech-ring {
+    position: absolute;
+    top: -10px; left: -10px;            /* 居中包围头像(120)·略大(140) */
+    width: 140px; height: 140px;
+    pointer-events: none; z-index: 3;
+    overflow: visible;
+    animation: techRingSpin 22s linear infinite;  /* 整个环缓慢转动 */
+  }
+  @keyframes techRingSpin { to { transform: rotate(360deg); } }
+  /* 内环虚线流动 */
+  .hero-frame .avatar .tech-ring .ring-orbit {
+    animation: dashFlow 6s linear infinite;
+  }
+  .hero-frame .avatar .tech-ring .ring-orbit-slow {
+    animation: dashFlow 12s linear infinite reverse;
+  }
+  @keyframes dashFlow {
+    to { stroke-dashoffset: -16; }
+  }
+  /* 星星闪烁·叠加在整体旋转之上 */
+  .hero-frame .avatar .tech-ring .star,
+  .hero-frame .avatar .tech-ring .dot {
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  .hero-frame .avatar .tech-ring .twinkle1 {
+    animation: twinkle 2.4s ease-in-out infinite;
+  }
+  .hero-frame .avatar .tech-ring .twinkle2 {
+    animation: twinkle 3.2s ease-in-out infinite 0.5s;
+  }
+  .hero-frame .avatar .tech-ring .twinkle3 {
+    animation: twinkle 2.8s ease-in-out infinite 1s;
+  }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.4; transform: scale(0.85); }
+    50%      { opacity: 1;   transform: scale(1.15); }
+  }
+
+  /* ========== SVG 蝴蝶群（凤蝶造型·半透明青灰色·覆盖整个 hero） ========== */
+  /* 蝴蝶容器：覆盖整个 hero·让蝴蝶可分布到名字左下侧 */
+  .hero-butterflies {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .hero-butterflies .bf {
+    position: absolute;
+    pointer-events: none;
+    overflow: visible;
+    filter: drop-shadow(0 4px 10px rgba(91,139,168,0.15));
+  }
+  /* 大蝴蝶·右上 */
+  .hero-butterflies .bf-lg {
+    width: clamp(160px, 16vw, 240px);
+    height: auto;
+    top: 2%;
+    right: 4%;
+    transform: rotate(-18deg);
+    animation: bfFloatLg 9s ease-in-out infinite;
+  }
+  /* 中蝴蝶·右下偏外（更淡） */
+  .hero-butterflies .bf-md {
+    width: clamp(110px, 10vw, 160px);
+    height: auto;
+    bottom: 8%;
+    right: 2%;
+    transform: rotate(22deg) scaleX(-1);
+    animation: bfFloatMd 11s ease-in-out infinite;
+  }
+  /* 小蝴蝶·名字左下侧·方向与右侧两只不同（镜像+朝左上飞） */
+  .hero-butterflies .bf-sm {
+    width: clamp(80px, 7vw, 115px);
+    height: auto;
+    bottom: 12%;
+    left: 4%;
+    transform: rotate(-18deg) scaleX(-1);
+    animation: bfFloatSm 7s ease-in-out infinite;
+  }
+  @keyframes bfFloatLg {
+    0%, 100% { transform: rotate(-18deg) translate(0, 0); }
+    50%      { transform: rotate(-22deg) translate(-6px, -8px); }
+  }
+  @keyframes bfFloatMd {
+    0%, 100% { transform: rotate(22deg) scaleX(-1) translate(0, 0); }
+    50%      { transform: rotate(26deg) scaleX(-1) translate(8px, 6px); }
+  }
+  @keyframes bfFloatSm {
+    0%, 100% { transform: rotate(-18deg) scaleX(-1) translate(0, 0); }
+    50%      { transform: rotate(-14deg) scaleX(-1) translate(-8px, -10px); }
+  }
+  @media (max-width: 820px) {
+    .hero-butterflies .bf-lg { width: 110px; top: 0; right: 0; opacity: 0.7; }
+    .hero-butterflies .bf-md { width: 80px;  bottom: 4%; right: -2%; opacity: 0.5; }
+    .hero-butterflies .bf-sm { width: 65px;  bottom: 8%; left: 2%; opacity: 0.6; }
+  }
+  @media (max-width: 480px) {
+    .hero-butterflies .bf-lg { width: 75px; opacity: 0.55; }
+    .hero-butterflies .bf-md { width: 55px; opacity: 0.40; }
+    .hero-butterflies .bf-sm { display: none; }  /* 极小屏隐藏最小蝴蝶 */
+  }
+  .hero-frame .name {
+    font-family: var(--font-serif); font-weight: 900;
+    font-size: clamp(2.4rem, 6vw, 3.6rem);
+    letter-spacing: 14px;
+    color: var(--paper-ink);
+    margin-bottom: 12px;
+    transition: color .4s;
+  }
+  .hero-frame .name:hover { color: var(--klein); }
+  .hero-frame .identity {
+    font-family: var(--font-serif);
+    font-size: 1.05rem; letter-spacing: 4px;
+    color: var(--klein);
+    margin-bottom: 28px;
+    padding: 6px 18px;
+    display: inline-block;
+    border: 1px solid var(--tiffany-line);
+    border-radius: 999px;
+    background: var(--tiffany-soft);
+  }
+  /* Hero 3个复制按钮 */
+  .hero-contacts {
+    display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;
+    padding-top: 22px;
+    border-top: 1px dashed var(--tiffany-line);
+  }
+  .hero-contact {
+    padding: 9px 18px; border-radius: 10px;
+    border: 1px solid var(--paper-3);
+    background: #fff;
+    font-family: var(--font-sans);
+    font-size: 0.86rem;
+    color: var(--paper-ink);
+    cursor: pointer;
+    transition: all 0.25s;
+    display: inline-flex; align-items: center; gap: 8px;
+    text-decoration: none;
+  }
+  .hero-contact:hover {
+    border-color: var(--klein);
+    color: var(--klein);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,47,167,0.12);
+  }
+  .hero-contact .ico { font-size: 1rem; }
+
+  /* SCROLL TO EXPLORE */
+  .scroll {
+    text-align: center; text-decoration: none; color: var(--paper-ink-soft);
+    animation: bob 2.4s ease-in-out infinite;
+    margin-top: 4px;
+  }
+  .scroll .en {
+    font-family: var(--font-sans); font-size: 0.82rem; letter-spacing: 3px;
+    text-transform: uppercase; font-weight: 500; color: var(--klein);
+  }
+  .scroll .arrow {
+    width: 10px; height: 10px; margin: 12px auto 0;
+    border-right: 1px solid var(--tiffany); border-bottom: 1px solid var(--tiffany);
+    transform: rotate(45deg);
+  }
+  @keyframes bob { 0%,100%{transform:translateY(0);} 50%{transform:translateY(10px);} }
+
+  /* ========== 过渡页（板块间·加大间距） ========== */
+  .ch {
+    max-width: 900px; margin: 0 auto;
+    padding: 110px 24px 30px;
+    text-align: center; position: relative;
+  }
+  .ch .big {
+    font-family: var(--font-serif); font-size: clamp(1.6rem, 3.6vw, 2rem);
+    letter-spacing: 12px; font-weight: 700; margin-bottom: 12px;
+    color: var(--paper-ink);
+    transition: color .3s;
+  }
+  .ch .big:hover { color: var(--klein); }
+  .ch .small {
+    font-family: var(--font-sans); font-size: 0.78rem; color: var(--tiffany); letter-spacing: 5px;
+    font-weight: 600; text-transform: uppercase;
+  }
+
+  /* ========== section 通用 ========== */
+  .sec {
+    max-width: 1100px; margin: 0 auto;
+    padding: 40px 40px 100px;
+    position: relative;
+  }
+  .sec-num {
+    position: absolute; top: -8px; left: 36px;
+    font-family: var(--font-serif); font-weight: 900;
+    font-size: 10rem; line-height: 1; letter-spacing: 2px;
+    color: var(--tiffany-soft);
+    pointer-events: none; user-select: none;
+    mix-blend-mode: multiply;
+  }
+  .sec-head { margin-bottom: 40px; padding-top: 16px; padding-left: 18px;
+    border-left: 4px solid var(--tiffany);
+  }
+  .sec-head .kicker {
+    font-family: var(--font-sans); font-size: 0.8rem; letter-spacing: 4px;
+    text-transform: uppercase; color: var(--klein); margin-bottom: 14px; font-weight: 600;
+  }
+  .sec-head h2 {
+    font-family: var(--font-serif); font-weight: 700; font-size: 2rem;
+    letter-spacing: 6px; margin-bottom: 16px;
+    transition: color .3s;
+    display: inline-block;
+  }
+  .sec-head h2:hover { color: var(--klein); }
+  .sec-head p {
+    color: var(--paper-ink-soft); font-size: 1rem; line-height: 2;
+    max-width: 720px; letter-spacing: 0.3px;
+  }
+  /* 板块顶部8大字包装 */
+  .sec-big-wrap {
+    text-align: center; margin-bottom: 40px;
+  }
+
+  /* ========== 01 信息卡（院校/专业/荣誉） ========== */
+  .info-card {
+    background: var(--paper-1);
+    border: 1px solid var(--tiffany-line);
+    border-radius: var(--card-radius);
+    padding: 36px 36px 16px;
+    position: relative;
+    box-shadow: 0 10px 36px rgba(29,27,22,0.05);
+  }
+  .info-card::before {
+    content: ''; position: absolute; top: 14px; left: 14px; right: 14px; bottom: 14px;
+    border: 1px dashed var(--tiffany-soft); pointer-events: none; border-radius: calc(var(--card-radius) - 8px);
+  }
+  .info-row {
+    display: grid; grid-template-columns: 110px 1fr; gap: 24px;
+    padding: 18px 6px;
+    border-bottom: 1px dashed var(--tiffany-soft);
+    position: relative; z-index: 2;
+  }
+  .info-row:last-child { border-bottom: none; }
+  .info-row .label {
+    font-family: var(--font-sans);
+    font-size: 0.78rem;
+    color: var(--tiffany);
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding-top: 4px;
+  }
+  .info-row .value {
+    font-family: var(--font-serif);
+    font-size: 1.05rem;
+    color: var(--paper-ink);
+    line-height: 2;
+    letter-spacing: 0.5px;
+    transition: color .25s;
+  }
+  .info-row:hover .value { color: var(--klein); }
+  .info-row .value strong { color: var(--klein); font-weight: 600; }
+  .info-row .value .em {
+    color: var(--klein); font-weight: 500;
+  }
+
+  /* ========== 02 证书 4x4 网格（横向长方形·默认灰·鼠标悬停显彩） ========== */
+  .cert-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+  .cert-cell {
+    aspect-ratio: 4 / 3;  /* 横向长方形 */
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    background: var(--paper-2);
+    border: 1px solid var(--tiffany-line);
+    position: relative;
+    transition: all 0.3s ease;
+  }
+  .cert-cell:hover {
+    transform: translateY(-4px) scale(1.03);
+    border-color: var(--klein);
+    box-shadow: 0 14px 30px rgba(0,47,167,0.18);
+    z-index: 2;
+  }
+  /* 底层：灰度图（始终显示） */
+  .cert-cell img.base {
+    width: 100%; height: 100%; object-fit: cover;
+    filter: grayscale(1) contrast(0.92) brightness(0.96);
+    display: block;
+    position: absolute; inset: 0;
+  }
+  /* 上层：彩色图·圆形唤起·默认 0 半径·hover 跟随鼠标扩大 */
+  .cert-cell img.color {
+    width: 100%; height: 100%; object-fit: cover;
+    filter: contrast(1) brightness(1) saturate(1.08);
+    display: block;
+    position: absolute; inset: 0;
+    clip-path: circle(0px at 50% 50%);
+    transition: clip-path 0.25s ease;
+    pointer-events: none;
+  }
+  .cert-cell:hover img.color {
+    clip-path: circle(140px at var(--mx, 50%) var(--my, 50%));
+  }
+  /* 圆形边缘柔化光环 */
+  .cert-cell::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(circle 140px at var(--mx, 50%) var(--my, 50%),
+      rgba(124,198,192,0.18) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+  .cert-cell:hover::after { opacity: 1; }
+  .cert-cell .badge {
+    position: absolute; top: 6px; right: 6px;
+    width: 24px; height: 24px; border-radius: 50%;
+    background: rgba(253,251,247,0.92);
+    color: var(--klein);
+    font-family: var(--font-sans); font-weight: 700; font-size: 0.72rem;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--tiffany-line);
+    backdrop-filter: blur(4px);
+    transition: all 0.3s;
+  }
+  .cert-cell:hover .badge {
+    background: var(--klein); color: #fff; border-color: var(--klein);
+    box-shadow: 0 0 12px var(--klein-halo);
+  }
+  .cert-foot {
+    margin-top: 28px; text-align: right;
+  }
+
+  /* ========== 证书查看器（左右箭头+右上×+点击外部关闭+Esc关闭） ========== */
+  .viewer {
+    position: fixed; inset: 0; z-index: 9990;
+    background: rgba(29,27,22,0.88);
+    backdrop-filter: blur(12px);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .viewer.show { opacity: 1; pointer-events: auto; }
+  .viewer .vbox {
+    position: relative;
+    max-width: 88vw; max-height: 86vh;
+  }
+  .viewer img {
+    max-width: 88vw; max-height: 80vh;
+    border-radius: 12px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+    border: 4px solid var(--paper);
+    display: block;
+  }
+  .viewer .prev, .viewer .next {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    width: 56px; height: 56px; border-radius: 50%;
+    background: rgba(253,251,247,0.95);
+    color: var(--klein);
+    border: 1px solid var(--tiffany-line);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem; font-weight: 700; cursor: pointer;
+    transition: all 0.25s;
+    z-index: 2;
+  }
+  .viewer .prev { left: -32px; }
+  .viewer .next { right: -32px; }
+  .viewer .prev:hover, .viewer .next:hover {
+    background: var(--klein); color: #fff;
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 6px 22px rgba(0,47,167,0.5);
+  }
+  .viewer .close {
+    position: absolute; top: -32px; right: -32px;
+    width: 48px; height: 48px; border-radius: 50%;
+    background: #EF4444; color: #fff;
+    border: 3px solid var(--paper);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem; font-weight: 700; cursor: pointer;
+    transition: all 0.25s;
+    z-index: 3;
+  }
+  .viewer .close:hover { transform: rotate(90deg) scale(1.12); box-shadow: 0 6px 22px rgba(239,68,68,0.6); }
+  .viewer .counter {
+    position: absolute; bottom: -42px; left: 50%; transform: translateX(-50%);
+    color: var(--paper); font-family: var(--font-sans); font-size: 0.9rem;
+    letter-spacing: 2px; white-space: nowrap;
+  }
+  .viewer .counter strong { color: var(--tiffany-2); font-weight: 700; }
+  .viewer .hint {
+    position: absolute; bottom: -68px; left: 50%; transform: translateX(-50%);
+    color: var(--paper-ink-muted); font-family: var(--font-sans); font-size: 0.76rem;
+    letter-spacing: 1px; white-space: nowrap; opacity: 0.7;
+  }
+
+  /* ========== 通用按钮 ========== */
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 11px 22px; border-radius: var(--btn-radius);
+    font-size: 0.9rem; font-weight: 500; letter-spacing: 0.5px;
+    cursor: pointer; transition: all .3s ease;
+    font-family: var(--font-sans);
+    text-decoration: none; color: inherit;
+    border: 1px solid var(--paper-3);
+    background: var(--paper);
+    cursor: none;
+  }
+  .btn.primary {
+    background: var(--klein); color: #fff; border-color: var(--klein);
+    box-shadow: 0 6px 18px rgba(0,47,167,0.22);
+  }
+  .btn.primary:hover {
+    background: var(--klein-2); border-color: var(--klein-2);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(0,47,167,0.32);
+    color: #fff !important;
+  }
+  .btn.ghost:hover {
+    border-color: var(--klein); color: var(--klein);
+    transform: translateY(-2px);
+    background: #fff;
+    box-shadow: 0 10px 24px rgba(0,47,167,0.10);
+  }
+
+  /* ========== 03 项目网格（6项） ========== */
+  .proj-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 18px;
+  }
+  .proj-card {
+    background: var(--paper-1);
+    border: 1px solid var(--tiffany-line);
+    border-radius: var(--card-radius);
+    padding: 28px 26px 22px;
+    text-decoration: none; color: inherit;
+    transition: all 0.35s ease;
+    position: relative; overflow: hidden;
+    display: block;
+  }
+  .proj-card::before {
+    content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px;
+    background: linear-gradient(90deg, var(--klein), var(--tiffany));
+    transform: scaleX(0); transform-origin: left;
+    transition: transform .4s ease;
+  }
+  .proj-card:hover {
+    transform: translateY(-6px);
+    border-color: var(--klein);
+    background: #fff;
+    box-shadow: 0 22px 50px rgba(0,47,167,0.12);
+  }
+  .proj-card:hover::before { transform: scaleX(1); }
+  .proj-card .ic {
+    font-size: 2rem; margin-bottom: 12px;
+    display: block;
+    transition: transform .3s;
+  }
+  .proj-card:hover .ic { transform: scale(1.2) rotate(-6deg); }
+  .proj-card h3 {
+    font-family: var(--font-serif); font-size: 1.12rem; font-weight: 600;
+    letter-spacing: 1px; margin-bottom: 6px;
+    transition: color .25s;
+  }
+  .proj-card:hover h3 { color: var(--klein); }
+  .proj-card .en {
+    font-family: var(--font-sans); font-size: 0.72rem; color: var(--tiffany);
+    letter-spacing: 2.5px; text-transform: uppercase; margin-bottom: 12px; font-weight: 600;
+  }
+  .proj-card p {
+    font-size: 0.86rem; color: var(--paper-ink-soft); line-height: 1.9;
+    margin-bottom: 14px;
+  }
+  .proj-card .go {
+    font-family: var(--font-sans); font-size: 0.82rem;
+    color: var(--klein); font-weight: 600;
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: gap .25s;
+  }
+  .proj-card:hover .go { gap: 10px; }
+
+  /* ========== 04 兴趣爱好（4项） ========== */
+  .interest-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 18px;
+  }
+  .interest-card {
+    padding: 30px 24px;
+    background: var(--paper-1);
+    border: 1px solid var(--tiffany-line);
+    border-radius: var(--card-radius);
+    transition: all 0.35s ease;
+    position: relative; overflow: hidden;
+    text-align: center;
+  }
+  .interest-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--tiffany), var(--klein));
+    transform: scaleX(0); transform-origin: left;
+    transition: transform .4s ease;
+  }
+  .interest-card:hover {
+    transform: translateY(-6px);
+    border-color: var(--klein);
+    background: #fff;
+    box-shadow: 0 22px 44px rgba(0,47,167,0.12);
+  }
+  .interest-card:hover::before { transform: scaleX(1); }
+  .interest-card .ic {
+    font-size: 2.4rem; margin-bottom: 14px; display: block;
+    transition: transform .3s;
+  }
+  .interest-card:hover .ic { transform: scale(1.18) rotate(-4deg); }
+  .interest-card h4 {
+    font-family: var(--font-serif); font-size: 1.15rem; font-weight: 600;
+    letter-spacing: 1px; margin-bottom: 6px;
+    transition: color .25s;
+  }
+  .interest-card:hover h4 { color: var(--klein); }
+  .interest-card .en {
+    font-family: var(--font-sans); font-size: 0.72rem; color: var(--tiffany);
+    letter-spacing: 2px; text-transform: uppercase;
+  }
+  .interest-card p {
+    font-size: 0.84rem; color: var(--paper-ink-soft); line-height: 1.8;
+    margin-top: 10px;
+  }
+
+  /* ========== 05 留言板 GUEST BOOK ========== */
+  .gb-wrap {
+    background: var(--paper-1);
+    border: 1px solid var(--tiffany-line);
+    border-radius: var(--card-radius);
+    padding: 32px 30px;
+    box-shadow: 0 12px 40px rgba(29,27,22,0.06);
+    position: relative; overflow: hidden;
+  }
+  .gb-wrap::before {
+    content: ''; position: absolute; top: 18px; left: 18px; right: 18px; bottom: 18px;
+    border: 1px dashed var(--tiffany-soft); pointer-events: none; border-radius: calc(var(--card-radius) - 8px);
+  }
+  .gb-wrap::after {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--klein), var(--tiffany));
+  }
+  .gb-form { position: relative; z-index: 2; }
+  .gb-row { display: grid; grid-template-columns: 1fr; gap: 14px; margin-bottom: 16px; }
+  .gb-row.two { grid-template-columns: 200px 1fr; }
+  .gb-input, .gb-textarea {
+    width: 100%; padding: 12px 16px; border-radius: 10px;
+    border: 1px solid var(--paper-3);
+    background: #fff;
+    font-family: var(--font-serif);
+    font-size: 0.94rem; color: var(--paper-ink);
+    outline: none;
+    transition: all 0.25s;
+    resize: vertical;
+    min-height: 40px;
+  }
+  .gb-textarea { min-height: 110px; line-height: 1.9; }
+  .gb-input:focus, .gb-textarea:focus {
+    border-color: var(--klein);
+    box-shadow: 0 0 0 3px var(--klein-soft), 0 0 12px rgba(0,47,167,0.18);
+  }
+  .gb-input::placeholder, .gb-textarea::placeholder { color: var(--paper-ink-muted); }
+  .gb-form-foot {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 14px; flex-wrap: wrap; margin-top: 6px;
+  }
+  .gb-tips {
+    font-family: var(--font-sans); font-size: 0.78rem; color: var(--paper-ink-muted);
+    letter-spacing: 0.3px;
+  }
+  .gb-tips strong { color: var(--klein); font-weight: 600; }
+  .gb-tips .tiff { color: var(--tiffany); font-weight: 600; }
+  .gb-submit {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 28px; border-radius: var(--btn-radius); cursor: pointer;
+    background: var(--klein); color: #fff;
+    border: 1px solid var(--klein);
+    font-family: var(--font-sans); font-size: 0.9rem; font-weight: 500; letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    cursor: none;
+  }
+  .gb-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 32px rgba(0,47,167,0.35);
+    background: var(--klein-2); border-color: var(--klein-2);
+    color: #fff !important;
+  }
+  /* 管理员折叠区 */
+  .gb-admin { margin-top: 18px; padding-top: 16px; border-top: 1px dashed var(--tiffany-line); }
+  .gb-admin-toggler {
+    display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+    font-family: var(--font-sans); font-size: 0.78rem; color: var(--tiffany);
+    font-weight: 600; letter-spacing: 0.4px;
+    transition: color .25s; user-select: none; cursor: none;
+  }
+  .gb-admin-toggler:hover { color: var(--klein); }
+  .gb-admin-box {
+    display: none; margin-top: 12px; padding: 14px 16px;
+    background: var(--tiffany-soft);
+    border-radius: 10px; border: 1px solid var(--tiffany-line);
+  }
+  .gb-admin-box.show { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; }
+  .gb-admin-box .gb-input { min-height: 38px; padding: 10px 14px; }
+  .gb-admin-st {
+    font-family: var(--font-sans); font-size: 0.78rem; font-weight: 600;
+    padding: 4px 10px; border-radius: 999px;
+  }
+  .gb-admin-st.off { color: var(--paper-ink-muted); background: var(--paper-2); }
+  .gb-admin-st.on  { color: #fff; background: var(--klein); box-shadow: 0 0 12px var(--klein-halo); }
+  .gb-admin-login, .gb-admin-logout {
+    padding: 10px 18px; border-radius: 10px; cursor: pointer;
+    font-family: var(--font-sans); font-size: 0.82rem; font-weight: 600; border: 1px solid transparent;
+    transition: all 0.25s; cursor: none;
+  }
+  .gb-admin-login { background: var(--tiffany); color: #fff; border-color: var(--tiffany); }
+  .gb-admin-login:hover { box-shadow: 0 6px 20px rgba(124,198,192,0.5); transform: translateY(-1px); background: var(--tiffany-2); border-color: var(--tiffany-2); color: #fff !important; }
+  .gb-admin-logout { background: #fff; color: var(--paper-ink-soft); border-color: var(--paper-3); }
+  .gb-admin-logout:hover { border-color: var(--klein); color: var(--klein); }
+  /* 留言列表 */
+  .gb-list { margin-top: 30px; position: relative; z-index: 2; display: flex; flex-direction: column; gap: 14px; }
+  .gb-empty {
+    padding: 42px 20px; text-align: center;
+    background: var(--paper);
+    border: 1px dashed var(--tiffany-line); border-radius: 12px;
+    font-family: var(--font-serif); color: var(--paper-ink-soft); font-size: 0.95rem;
+    letter-spacing: 0.4px;
+  }
+  .gb-empty strong { color: var(--klein); }
+  .gb-count {
+    margin: 14px 2px 4px;
+    font-family: var(--font-sans); font-size: 0.78rem; color: var(--paper-ink-muted); letter-spacing: 0.4px;
+  }
+  .gb-count strong { color: var(--klein); font-weight: 700; font-size: 0.88rem; }
+  .gb-count .tiff { color: var(--tiffany); font-weight: 700; }
+  .gb-item {
+    background: #fff;
+    border-radius: 14px; padding: 20px 22px 18px;
+    border: 1px solid var(--paper-3);
+    position: relative;
+    transition: all 0.3s ease;
+    overflow: hidden;
+  }
+  .gb-item::before {
+    content: ''; position: absolute; top: 0; left: 0; width: 3px; bottom: 0;
+    background: var(--tiffany);
+    transform: scaleY(0); transform-origin: top;
+    transition: transform 0.35s ease;
+  }
+  .gb-item:hover {
+    transform: translateY(-4px);
+    border-color: var(--klein);
+    box-shadow: 0 18px 40px rgba(0,47,167,0.10);
+  }
+  .gb-item:hover::before { transform: scaleY(1); background: var(--klein); }
+  .gb-item-head {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; margin-bottom: 10px;
+  }
+  .gb-nick {
+    font-family: var(--font-serif); font-weight: 700; color: var(--klein);
+    font-size: 1rem; letter-spacing: 0.3px;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .gb-nick .tag {
+    padding: 2px 8px; border-radius: 999px;
+    font-family: var(--font-sans); font-size: 0.66rem; letter-spacing: 0.4px; font-weight: 700;
+  }
+  .gb-nick .tag.me { background: var(--klein-soft); color: var(--klein); border: 1px solid rgba(0,47,167,0.18); }
+  .gb-nick .tag.self { background: var(--tiffany-soft); color: #0A8F88; border: 1px solid var(--tiffany-line); }
+  .gb-time {
+    font-family: var(--font-sans); font-size: 0.78rem; color: var(--paper-ink-muted);
+    letter-spacing: 0.3px; white-space: nowrap;
+  }
+  .gb-content {
+    color: var(--paper-ink); font-size: 0.95rem;
+    line-height: 2; letter-spacing: 0.25px;
+    white-space: pre-wrap; word-break: break-word;
+  }
+  .gb-del {
+    position: absolute; top: 12px; right: 12px;
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--paper-1);
+    border: 1px solid var(--paper-3);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--paper-ink-muted);
+    font-size: 0.95rem; cursor: pointer;
+    transition: all 0.3s ease;
+    cursor: none;
+  }
+  .gb-del:hover {
+    transform: rotate(90deg) scale(1.08);
+    background: #EF4444; color: #fff; border-color: #EF4444;
+    box-shadow: 0 0 14px rgba(239,68,68,0.5);
+  }
+
+  /* ========== Footer ========== */
+  footer {
+    padding: 40px 24px 72px; text-align: center;
+    border-top: 1px solid var(--tiffany-line);
+    background: linear-gradient(180deg, transparent, rgba(124,198,192,0.06));
+    margin-top: 60px;
+  }
+  footer .motto-foot {
+    font-style: italic; color: var(--paper-ink-soft); font-size: 0.9rem;
+    margin-bottom: 16px; letter-spacing: 0.4px;
+    max-width: 680px; margin-left: auto; margin-right: auto;
+  }
+  footer .motto-foot strong { color: var(--klein); font-weight: 700; }
+  footer .copy {
+    font-family: var(--font-sans); font-size: 0.78rem; color: var(--paper-ink-muted);
+    letter-spacing: 1.5px;
+  }
+
+  /* ========== 复制确认弹窗 + Toast ========== */
+  #copyMask {
+    position: fixed; inset: 0; z-index: 9998;
+    background: rgba(29,27,22,0.55); backdrop-filter: blur(6px);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+  }
+  #copyMask.show { opacity: 1; pointer-events: auto; }
+  #copyDlg {
+    width: min(440px, 92vw); background: var(--paper); border-radius: 18px;
+    padding: 32px 28px 24px;
+    box-shadow: 0 40px 100px rgba(0,47,167,0.18), 0 0 0 1px var(--tiffany-line);
+    transform: scale(0.94); transition: transform 0.3s cubic-bezier(0.22,1,0.36,1);
+    position: relative; overflow: hidden; border: 1px solid var(--tiffany-line);
+  }
+  #copyMask.show #copyDlg { transform: scale(1); }
+  #copyDlg::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--tiffany), var(--klein));
+  }
+  #copyIco {
+    width: 60px; height: 60px; border-radius: 50%;
+    background: var(--klein-soft); border: 1px solid rgba(0,47,167,0.18);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.7rem; margin: 0 auto 16px;
+  }
+  #toast {
+    position: fixed; top: 86px; left: 50%; transform: translateX(-50%) translateY(-20px);
+    padding: 12px 22px; border-radius: 12px;
+    background: var(--paper); color: var(--paper-ink);
+    font-size: 0.9rem; font-weight: 500; z-index: 9999;
+    box-shadow: 0 10px 40px rgba(0,47,167,0.12), 0 0 0 1px var(--tiffany-line);
+    backdrop-filter: blur(10px);
+    opacity: 0; pointer-events: none;
+    transition: all 0.35s cubic-bezier(0.22,1,0.36,1);
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: var(--font-sans);
+    border-top: 3px solid var(--klein);
+    max-width: 90vw;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ========== 响应式 ========== */
+  @media (max-width: 820px) {
+    .banner { padding: 0 20px; }
+    .banner .nav-right { display: none; }
+    .sec { padding: 30px 20px 80px; }
+    .sec-num { font-size: 6.5rem; left: 20px; }
+    .hero-frame { padding: 36px 22px 28px; }
+    .hero-frame .name { letter-spacing: 8px; }
+    .info-row { grid-template-columns: 80px 1fr; gap: 14px; }
+    .cert-grid { grid-template-columns: repeat(3, 1fr); }
+    .gb-row.two { grid-template-columns: 1fr; }
+    .gb-admin-box.show { grid-template-columns: 1fr; }
+    .viewer .prev { left: 4px; }
+    .viewer .next { right: 4px; }
+    .viewer .close { top: -16px; right: -8px; width: 40px; height: 40px; font-size: 1.3rem; }
+  }
+  @media (max-width: 540px) {
+    .cert-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<!-- 进度条 + 自定义光标 -->
+<div class="progress" id="progress"></div>
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- Banner（名言原文 + 概述性菜单） -->
+<header class="banner">
+  <a href="index.html" class="brand">
+    <span class="dot"></span>
+    <h6>刘玮琦 · LIU WEIQI</h6>
+    <span class="motto">· <strong>一万年太久，只争朝夕</strong> ·</span>
+  </a>
+  <nav class="nav-right">
+    <a href="#home">首页</a><span class="sep">│</span>
+    <a href="#sec01">学术</a><span class="sep">│</span>
+    <a href="#sec02">认证</a><span class="sep">│</span>
+    <a href="#sec03">造物</a><span class="sep">│</span>
+    <a href="#sec04">兴趣</a><span class="sep">│</span>
+    <a href="#sec05">日志</a>
+  </nav>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="hero" id="home">
+  <div class="hero-top">
+    <!-- Hero 顶部 8大字 双层（实心+描边镂空） -->
+    <div class="big-title">
+      <span class="row solid">人机同频</span>
+      <span class="row outline">跨界成链</span>
+    </div>
+  </div>
+
+  <!-- ========== SVG 蝴蝶群（凤蝶造型·前翅三角尖·后翅圆带尾突·半透明青灰色） ========== -->
+  <!-- 蝴蝶放在 hero-top 之外·绝对定位到 hero 右侧空白区·不挡 8 大字 -->
+  <div class="hero-butterflies">
+    <!-- 大蝴蝶·右上 -->
+    <svg class="bf bf-lg" viewBox="0 0 280 300" aria-hidden="true">
+      <defs>
+        <radialGradient id="bfWingLg" cx="50%" cy="46%" r="64%">
+          <stop offset="0%"  stop-color="#D4EDD8" stop-opacity="0.62"/>
+          <stop offset="45%" stop-color="#A8D8BA" stop-opacity="0.42"/>
+          <stop offset="80%" stop-color="#7CC6C0" stop-opacity="0.30"/>
+          <stop offset="100%" stop-color="#5B8BA8" stop-opacity="0.14"/>
+        </radialGradient>
+        <radialGradient id="bfEyeLg" cx="50%" cy="50%" r="50%">
+          <stop offset="0%"  stop-color="#002FA7" stop-opacity="0.45"/>
+          <stop offset="100%" stop-color="#002FA7" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <!-- 左前翅·圆润饱满·顶端优美弧线 -->
+      <path d="M140,108
+               C94,22 32,34 12,100
+               C2,142 22,158 140,128 Z"
+            fill="url(#bfWingLg)" stroke="#7CC6C0" stroke-width="0.8" stroke-opacity="0.55"/>
+      <!-- 右前翅·镜像 -->
+      <path d="M140,108
+               C186,22 248,34 268,100
+               C278,142 258,158 140,128 Z"
+            fill="url(#bfWingLg)" stroke="#7CC6C0" stroke-width="0.8" stroke-opacity="0.55"/>
+      <!-- 左后翅·丰满圆形 + 修长尾突·S 形优美弧度（参考凤蝶） -->
+      <path d="M140,128
+               C116,138 82,146 56,164
+               C30,184 18,216 26,246
+               C42,256 62,248 76,228
+               C90,252 88,280 70,292
+               C50,292 38,276 44,258
+               C24,240 22,200 46,172
+               C70,150 108,138 140,144 Z"
+            fill="url(#bfWingLg)" stroke="#7CC6C0" stroke-width="0.8" stroke-opacity="0.46"/>
+      <!-- 右后翅·镜像 -->
+      <path d="M140,128
+               C164,138 198,146 224,164
+               C250,184 262,216 254,246
+               C238,256 218,248 204,228
+               C190,252 192,280 210,292
+               C230,292 242,276 236,258
+               C256,240 258,200 234,172
+               C210,150 172,138 140,144 Z"
+            fill="url(#bfWingLg)" stroke="#7CC6C0" stroke-width="0.8" stroke-opacity="0.46"/>
+      <!-- 翅膀眼斑 -->
+      <circle cx="50"  cy="114" r="11" fill="url(#bfEyeLg)"/>
+      <circle cx="230" cy="114" r="11" fill="url(#bfEyeLg)"/>
+      <circle cx="58"  cy="214" r="6" fill="url(#bfEyeLg)"/>
+      <circle cx="222" cy="214" r="6" fill="url(#bfEyeLg)"/>
+      <!-- 翅脉·装饰线 -->
+      <path d="M140,110 Q88,80 40,70" fill="none" stroke="#7CC6C0" stroke-width="0.4" stroke-opacity="0.45"/>
+      <path d="M140,110 Q192,80 240,70" fill="none" stroke="#7CC6C0" stroke-width="0.4" stroke-opacity="0.45"/>
+      <path d="M140,144 Q100,178 66,242" fill="none" stroke="#7CC6C0" stroke-width="0.4" stroke-opacity="0.38"/>
+      <path d="M140,144 Q180,178 214,242" fill="none" stroke="#7CC6C0" stroke-width="0.4" stroke-opacity="0.38"/>
+      <!-- 身体·纤细 -->
+      <ellipse cx="140" cy="120" rx="2.2" ry="44" fill="#1D1B16" fill-opacity="0.50"/>
+      <circle  cx="140" cy="80"  r="3.4" fill="#1D1B16" fill-opacity="0.55"/>
+      <!-- 触角·细丝飘逸 -->
+      <path d="M140,78 Q118,50 96,26" fill="none" stroke="#1D1B16" stroke-width="0.85" stroke-opacity="0.52" stroke-linecap="round"/>
+      <path d="M140,78 Q162,50 184,26" fill="none" stroke="#1D1B16" stroke-width="0.85" stroke-opacity="0.52" stroke-linecap="round"/>
+      <circle cx="96"  cy="26" r="1.6" fill="#7CC6C0" fill-opacity="0.88"/>
+      <circle cx="184" cy="26" r="1.6" fill="#7CC6C0" fill-opacity="0.88"/>
+    </svg>
+
+    <!-- 中蝴蝶·右下偏外（更淡） -->
+    <svg class="bf bf-md" viewBox="0 0 280 300" aria-hidden="true">
+      <defs>
+        <radialGradient id="bfWingMd" cx="50%" cy="46%" r="64%">
+          <stop offset="0%"  stop-color="#D4EDD8" stop-opacity="0.46"/>
+          <stop offset="50%" stop-color="#A8D8BA" stop-opacity="0.28"/>
+          <stop offset="100%" stop-color="#5B8BA8" stop-opacity="0.10"/>
+        </radialGradient>
+        <!-- 后翅专用渐变·饱满淡绿·边缘不透明（不发白） -->
+        <radialGradient id="bfWingMdHind" cx="50%" cy="60%" r="62%">
+          <stop offset="0%"  stop-color="#C8E6C9" stop-opacity="0.52"/>
+          <stop offset="60%" stop-color="#A8D8BA" stop-opacity="0.42"/>
+          <stop offset="100%" stop-color="#8BC9A8" stop-opacity="0.34"/>
+        </radialGradient>
+      </defs>
+      <path d="M140,108 C94,22 32,34 12,100 C2,142 22,158 140,128 Z"
+            fill="url(#bfWingMd)" stroke="#7CC6C0" stroke-width="0.8" stroke-opacity="0.38"/>
+      <path d="M140,108 C186,22 248,34 268,100 C278,142 258,158 140,128 Z"
+            fill="url(#bfWingMd)" stroke="#7CC6C0" stroke-width="0.8" stroke-opacity="0.38"/>
+      <path d="M140,128 C116,138 82,146 56,164 C30,184 18,216 26,246 C42,256 62,248 76,228 C90,252 88,280 70,292 C50,292 38,276 44,258 C24,240 22,200 46,172 C70,150 108,138 140,144 Z"
+            fill="url(#bfWingMdHind)" stroke="#7CC6C0" stroke-width="0.8" stroke-opacity="0.36"/>
+      <path d="M140,128 C164,138 198,146 224,164 C250,184 262,216 254,246 C238,256 218,248 204,228 C190,252 192,280 210,292 C230,292 242,276 236,258 C256,240 258,200 234,172 C210,150 172,138 140,144 Z"
+            fill="url(#bfWingMdHind)" stroke="#7CC6C0" stroke-width="0.8" stroke-opacity="0.36"/>
+      <ellipse cx="140" cy="120" rx="2.0" ry="40" fill="#1D1B16" fill-opacity="0.38"/>
+      <circle  cx="140" cy="82"  r="3.0" fill="#1D1B16" fill-opacity="0.42"/>
+      <path d="M140,80 Q120,56 100,40" fill="none" stroke="#1D1B16" stroke-width="0.75" stroke-opacity="0.38" stroke-linecap="round"/>
+      <path d="M140,80 Q160,56 180,40" fill="none" stroke="#1D1B16" stroke-width="0.75" stroke-opacity="0.38" stroke-linecap="round"/>
+    </svg>
+
+    <!-- 小蝴蝶·名字左下侧 -->
+    <svg class="bf bf-sm" viewBox="0 0 280 300" aria-hidden="true">
+      <defs>
+        <radialGradient id="bfWingSm" cx="50%" cy="46%" r="64%">
+          <stop offset="0%"  stop-color="#D4EDD8" stop-opacity="0.54"/>
+          <stop offset="50%" stop-color="#A8D8BA" stop-opacity="0.32"/>
+          <stop offset="100%" stop-color="#5B8BA8" stop-opacity="0.14"/>
+        </radialGradient>
+        <!-- 后翅专用渐变·饱满淡绿·边缘不透明（不发白） -->
+        <radialGradient id="bfWingSmHind" cx="50%" cy="60%" r="62%">
+          <stop offset="0%"  stop-color="#C8E6C9" stop-opacity="0.58"/>
+          <stop offset="60%" stop-color="#A8D8BA" stop-opacity="0.46"/>
+          <stop offset="100%" stop-color="#8BC9A8" stop-opacity="0.38"/>
+        </radialGradient>
+      </defs>
+      <path d="M140,108 C94,22 32,34 12,100 C2,142 22,158 140,128 Z"
+            fill="url(#bfWingSm)" stroke="#7CC6C0" stroke-width="0.8" stroke-opacity="0.44"/>
+      <path d="M140,108 C186,22 248,34 268,100 C278,142 258,158 140,128 Z"
+            fill="url(#bfWingSm)" stroke="#7CC6C0" stroke-width="0.8" stroke-opacity="0.44"/>
+      <path d="M140,128 C116,138 82,146 56,164 C30,184 18,216 26,246 C42,256 62,248 76,228 C90,252 88,280 70,292 C50,292 38,276 44,258 C24,240 22,200 46,172 C70,150 108,138 140,144 Z"
+            fill="url(#bfWingSmHind)" stroke="#7CC6C0" stroke-width="0.8" stroke-opacity="0.42"/>
+      <path d="M140,128 C164,138 198,146 224,164 C250,184 262,216 254,246 C238,256 218,248 204,228 C190,252 192,280 210,292 C230,292 242,276 236,258 C256,240 258,200 234,172 C210,150 172,138 140,144 Z"
+            fill="url(#bfWingSmHind)" stroke="#7CC6C0" stroke-width="0.8" stroke-opacity="0.42"/>
+      <ellipse cx="140" cy="120" rx="2.1" ry="42" fill="#1D1B16" fill-opacity="0.46"/>
+      <circle  cx="140" cy="80"  r="3.2" fill="#1D1B16" fill-opacity="0.50"/>
+      <path d="M140,78 Q119,52 99,34" fill="none" stroke="#1D1B16" stroke-width="0.82" stroke-opacity="0.46" stroke-linecap="round"/>
+      <path d="M140,78 Q161,52 181,34" fill="none" stroke="#1D1B16" stroke-width="0.82" stroke-opacity="0.46" stroke-linecap="round"/>
+      <circle cx="99"  cy="34" r="1.4" fill="#7CC6C0" fill-opacity="0.85"/>
+      <circle cx="181" cy="34" r="1.4" fill="#7CC6C0" fill-opacity="0.85"/>
+    </svg>
+  </div>
+
+  <div class="hero-frame">
+    <div class="avatar">
+      <img src="666.png" alt="头像" onerror="this.removeAttribute('src'); this.parentElement.innerHTML += '<div style=\'position:absolute;inset:4px;border-radius:50%;background:linear-gradient(135deg,#FDFBF7,#EFE7D4);display:flex;align-items:center;justify-content:center;font-family:var(--font-serif);font-weight:900;font-size:3rem;color:var(--klein);letter-spacing:2px;\'>刘</div>';">
+      <!-- 科技风星星光环·包围整个头像圆环·会转动 -->
+      <svg class="tech-ring" viewBox="0 0 200 200" aria-hidden="true">
+        <!-- 3 层椭圆光环·以头像中心(100,100)为圆心·围绕整个头像 -->
+        <!-- 内环·克莱茵兰虚线（流动） -->
+        <circle class="ring-orbit" cx="100" cy="100" r="82"
+          fill="none" stroke="#002FA7" stroke-width="1.2"
+          stroke-opacity="0.55" stroke-dasharray="6 4"/>
+        <!-- 中环·蒂芙尼细实线 -->
+        <circle cx="100" cy="100" r="90"
+          fill="none" stroke="#7CC6C0" stroke-width="0.8"
+          stroke-opacity="0.42"/>
+        <!-- 外环·克莱茵兰虚淡（反向流动） -->
+        <circle class="ring-orbit-slow" cx="100" cy="100" r="98"
+          fill="none" stroke="#002FA7" stroke-width="0.6"
+          stroke-opacity="0.30" stroke-dasharray="2 5"/>
+        <!-- 淡黄色 4 角小星星·均匀分布在光环圆周上 -->
+        <g fill="#F5D76E">
+          <path class="star twinkle1" d="M195,100 l1.4,3.6 3.6,1.4 -3.6,1.4 -1.4,3.6 -1.4,-3.6 -3.6,-1.4 3.6,-1.4 z"/>
+          <path class="star twinkle2" d="M148,18 l1.2,3 3,1.2 -3,1.2 -1.2,3 -1.2,-3 -3,-1.2 3,-1.2 z"/>
+          <path class="star twinkle3" d="M52,18 l1.2,3 3,1.2 -3,1.2 -1.2,3 -1.2,-3 -3,-1.2 3,-1.2 z"/>
+          <path class="star twinkle1" d="M5,100 l1.4,3.6 3.6,1.4 -3.6,1.4 -1.4,3.6 -1.4,-3.6 -3.6,-1.4 3.6,-1.4 z"/>
+          <path class="star twinkle2" d="M52,182 l1.2,3 3,1.2 -3,1.2 -1.2,3 -1.2,-3 -3,-1.2 3,-1.2 z"/>
+          <path class="star twinkle3" d="M148,182 l1.2,3 3,1.2 -3,1.2 -1.2,3 -1.2,-3 -3,-1.2 3,-1.2 z"/>
+        </g>
+        <!-- 光晕小圆点·散布在光环上 -->
+        <circle class="dot twinkle2" cx="170" cy="44" r="2" fill="#F5D76E" opacity="0.75"/>
+        <circle class="dot twinkle3" cx="30" cy="156" r="1.8" fill="#F5D76E" opacity="0.65"/>
+        <circle class="dot twinkle1" cx="170" cy="156" r="1.6" fill="#F5D76E" opacity="0.70"/>
+        <circle class="dot twinkle2" cx="30" cy="44" r="1.4" fill="#F5D76E" opacity="0.60"/>
+      </svg>
+    </div>
+    <h1 class="name">刘 玮 琦</h1>
+    <div class="identity">AI + 人文跨界探索者</div>
+
+    <!-- 3个复制按钮（电话/邮箱/微信·点击→确认→复制） -->
+    <div class="hero-contacts">
+      <a class="hero-contact" href="javascript:void(0)" data-copy="tel"><span class="ico">✆</span>175 1657 3576</a>
+      <a class="hero-contact" href="javascript:void(0)" data-copy="mail"><span class="ico">📧</span>lwq657756a99@qq.com</a>
+      <a class="hero-contact" href="javascript:void(0)" data-copy="wx"><span class="ico">📱</span>微信：wwwww4657</a>
+    </div>
+  </div>
+
+  <a href="#sec01" class="scroll">
+    <div class="en">SCROLL TO EXPLORE</div>
+    <div class="arrow"></div>
+  </a>
+</section>
+
+<!-- ============ 01 学术根基 ============ -->
+<div class="ch"><div class="big">学术根基</div><div class="small">向 下 展 开</div></div>
+<section class="sec" id="sec01">
+  <div class="sec-num">01</div>
+  <div class="sec-big-wrap">
+    <div class="big-title">
+      <span class="row solid">学无止境</span>
+      <span class="row outline">知也无涯</span>
+    </div>
+  </div>
+  <div class="sec-head">
+    <div class="kicker">—— ACADEMIC ROOT · 01</div>
+    <h2>学 术 根 基</h2>
+  </div>
+
+  <div class="info-card">
+    <div class="info-row">
+      <div class="label">院校</div>
+      <div class="value"><strong>南阳师范学院</strong></div>
+    </div>
+    <div class="info-row">
+      <div class="label">专业</div>
+      <div class="value">汉语言文学 <span class="em">(2026 - 2030)</span></div>
+    </div>
+    <div class="info-row">
+      <div class="label">荣誉</div>
+      <div class="value">高中阶段：数次荣获奖学金、三好学生、进步之星称号，获<strong>优秀毕业生证书</strong>。</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 02 专业认证 ============ -->
+<div class="ch"><div class="big">专业认证</div><div class="small">向 下 展 开</div></div>
+<section class="sec" id="sec02">
+  <div class="sec-num">02</div>
+  <div class="sec-head">
+    <div class="kicker">—— PROFESSIONAL CERT · 02</div>
+    <h2>专 业 认 证</h2>
+    <p>共 16 项证书 · 4×4 网格展示 · 点击任意一张可放大查看，左右箭头切换，右上角 × 关闭；右下角「进入宇宙」可进入 3D 证书空间。</p>
+  </div>
+
+  <div class="cert-grid" id="certGrid"></div>
+
+  <div class="cert-foot">
+    <a href="02_证书宇宙.html" class="btn primary">🌌 进入证书宇宙 →</a>
+  </div>
+</section>
+
+<!-- ============ 03 造物实验·持续迭代（专业技能 / 6项目） ============ -->
+<div class="ch"><div class="big">造物实验</div><div class="small">向 下 展 开</div></div>
+<section class="sec" id="sec03">
+  <div class="sec-num">03</div>
+  <div class="sec-big-wrap">
+    <div class="big-title">
+      <span class="row solid">造物实验</span>
+      <span class="row outline">持续迭代</span>
+    </div>
+  </div>
+  <div class="sec-head">
+    <div class="kicker">—— CREATION EXPERIMENT · 03</div>
+    <h2>专 业 技 能</h2>
+    <p>六个方向的实验场——每一项都可点击进入独立详情页，详情页之间可自由切换。</p>
+  </div>
+
+  <div class="proj-grid">
+    <a class="proj-card" href="03_1_网站部署.html">
+      <span class="ic">🌐</span>
+      <h3>网站部署开发</h3>
+      <div class="en">WEB DEPLOY</div>
+      <p>从静态 HTML/CSS 到 Netlify/Vercel 部署，独立搭建并上线个人站点与小游戏。</p>
+      <span class="go">进入详情 →</span>
+    </a>
+    <a class="proj-card" href="03_2_视觉设计.html">
+      <span class="ic">🎨</span>
+      <h3>视觉设计 / PPT</h3>
+      <div class="en">VISUAL DESIGN</div>
+      <p>答辩 / 汇报 PPT 版式与视觉呈现，海报与图文内容设计。</p>
+      <span class="go">进入详情 →</span>
+    </a>
+    <a class="proj-card" href="03_3_视频剪辑.html">
+      <span class="ic">🎬</span>
+      <h3>视频剪辑</h3>
+      <div class="en">VIDEO EDIT</div>
+      <p>短视频脚本、剪辑节奏、调色与音效，AIGC 辅助内容生产。</p>
+      <span class="go">进入详情 →</span>
+    </a>
+    <a class="proj-card" href="03_4_自媒体运营.html">
+      <span class="ic">📱</span>
+      <h3>自媒体运营</h3>
+      <div class="en">SOCIAL MEDIA</div>
+      <p>账号定位、内容选题、运营节奏，短视频累计 2k+ 赞、6w+ 播放。</p>
+      <span class="go">进入详情 →</span>
+    </a>
+    <a class="proj-card" href="03_5_游戏制作.html">
+      <span class="ic">🎮</span>
+      <h3>游戏制作</h3>
+      <div class="en">GAME DEV</div>
+      <p>独立开发的网页版飞行射击 / 坦克大战，附外部体验链接。</p>
+      <span class="go">进入详情 →</span>
+    </a>
+    <a class="proj-card" href="03_6_音乐发行.html">
+      <span class="ic">🎵</span>
+      <h3>音乐发行</h3>
+      <div class="en">MUSIC RELEASE</div>
+      <p>网易云 AI 音乐人 · AIGC 音频落地，全流程独立部署上单曲《你走吧》。</p>
+      <span class="go">进入详情 →</span>
+    </a>
+  </div>
+</section>
+
+<!-- ============ 04 兴趣爱好 ============ -->
+<div class="ch"><div class="big">兴趣爱好</div><div class="small">向 下 展 开</div></div>
+<section class="sec" id="sec04">
+  <div class="sec-num">04</div>
+  <div class="sec-head">
+    <div class="kicker">—— INTERESTS · 04</div>
+    <h2>兴 趣 爱 好</h2>
+  </div>
+
+  <div class="interest-grid">
+    <div class="interest-card">
+      <span class="ic">🎵</span>
+      <h4>竹笛</h4>
+      <div class="en">BAMBOO FLUTE</div>
+      <p>传统文化熏陶，乐感培养，竹韵悠远。</p>
+    </div>
+    <div class="interest-card">
+      <span class="ic">💪</span>
+      <h4>健身</h4>
+      <div class="en">FITNESS</div>
+      <p>强健体魄，保持专注，长期主义的基础。</p>
+    </div>
+    <div class="interest-card">
+      <span class="ic">📚</span>
+      <h4>阅读</h4>
+      <div class="en">READING</div>
+      <p>持续输入，构建独立思考的完整体系。</p>
+    </div>
+    <div class="interest-card">
+      <span class="ic">✒️</span>
+      <h4>书法</h4>
+      <div class="en">CALLIGRAPHY</div>
+      <p>修心养性，锤炼笔力，让心静下来。</p>
+    </div>
+    <div class="interest-card">
+      <span class="ic">🎧</span>
+      <h4>音乐</h4>
+      <div class="en">MUSIC</div>
+      <p>聆听与创作，跨类型融合，让情绪有回响。</p>
+    </div>
+    <div class="interest-card">
+      <span class="ic">🏸</span>
+      <h4>羽毛球</h4>
+      <div class="en">BADMINTON</div>
+      <p>反应与节奏，攻守之间，享受挥拍的瞬间。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 05 集体日志（留言板） ============ -->
+<div class="ch"><div class="big">集体日志</div><div class="small">向 下 展 开</div></div>
+<section class="sec" id="sec05">
+  <div class="sec-num">05</div>
+  <div class="sec-big-wrap">
+    <div class="big-title">
+      <span class="row solid">交流共鸣</span>
+      <span class="row outline">迭代未来</span>
+    </div>
+  </div>
+  <div class="sec-head">
+    <div class="kicker">—— COLLECTIVE LOG · 05</div>
+    <h2>集 体 日 志</h2>
+    <p>留下你的痕迹 · 每一条留言都是一次跨越时空的连接。<strong>留言永久保存</strong>。</p>
+  </div>
+
+  <div class="gb-wrap">
+    <form class="gb-form" id="gbForm" autocomplete="off" onsubmit="return false;">
+      <div class="gb-row two">
+        <input class="gb-input" id="gbNick" maxlength="24" placeholder="身份标识 · 你的昵称（必填·24字内）" value="">
+        <input class="gb-input" id="gbTopic" maxlength="40" placeholder="话题 / 主题（可选·40字内）" value="">
+      </div>
+      <div class="gb-row">
+        <textarea class="gb-textarea" id="gbContent" maxlength="800" placeholder="想说的话（必填·800字内，支持换行）"></textarea>
+      </div>
+      <div class="gb-form-foot">
+        <div class="gb-tips">
+          · 仅 <strong>发布这条留言的作者本人（同一浏览器）</strong> 和 <span class="tiff">站点管理员</span> 可删除留言<br>
+          · 留言永久保存（localStorage·下次打开电脑或修改其他东西都不会消失）· 显示年月日时分
+        </div>
+        <button class="gb-submit" id="gbSubmit" type="button">⏎ 发送留言</button>
+      </div>
+    </form>
+
+    <div class="gb-admin">
+      <span class="gb-admin-toggler" id="gbAdminToggler">⚙ 切换管理员模式 <span class="gb-admin-st off" id="gbAdminSt">未登录</span> ▾</span>
+      <div class="gb-admin-box" id="gbAdminBox">
+        <input type="password" class="gb-input" id="gbPwd" placeholder="请输入管理员密码（站点本人专属）">
+        <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;">
+          <button class="gb-admin-login" id="gbAdminLogin" type="button">登录管理员</button>
+          <button class="gb-admin-logout" id="gbAdminLogout" type="button" style="display:none;">退出管理员</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="gb-count" id="gbCount"><strong>0</strong> 条留言 · 期待你的第一条 ✨ <span class="tiff">· 最新显示在最上面</span></div>
+    <div class="gb-list" id="gbList"></div>
+  </div>
+</section>
+
+<footer>
+  <p class="motto-foot">" <strong>一万年太久，只争朝夕</strong> " —— 用心探索 AI + 人文的无限可能</p>
+  <div class="copy">© 2026 刘玮琦 · LIU WEIQI · ALL RIGHTS RESERVED</div>
+</footer>
+
+<!-- ============ 证书查看器（左右箭头+右上×+Esc关闭+点击外部关闭） ============ -->
+<div class="viewer" id="certViewer">
+  <div class="vbox">
+    <img id="certImg" src="" alt="证书">
+    <button class="prev" id="certPrev" title="上一张 ←">‹</button>
+    <button class="next" id="certNext" title="下一张 →">›</button>
+    <button class="close" id="certClose" title="关闭 Esc">×</button>
+    <div class="counter"><strong id="certIdx">1</strong> / <span id="certTotal">16</span></div>
+    <div class="hint">← → 切换 · Esc 或点击空白关闭</div>
+  </div>
+</div>
+
+<!-- 复制确认弹窗 + Toast -->
+<div id="copyMask">
+  <div id="copyDlg">
+    <div id="copyIco">📋</div>
+    <div style="font-size:0.92rem;text-align:center;color:var(--paper-ink-soft);margin-bottom:4px;letter-spacing:0.3px;">是否复制以下<span id="copyType" style="color:var(--klein);font-weight:600;">内容</span>到剪贴板？</div>
+    <div id="copyVal" style="text-align:center;font-weight:700;font-size:1.2rem;padding:14px 16px;margin:14px auto 22px;background:#fff;border-radius:12px;color:var(--klein);border:1px dashed var(--tiffany-line);user-select:all;word-break:break-all;">内容</div>
+    <div style="display:flex;gap:12px;">
+      <button id="copyCancel" style="flex:1;padding:12px;border-radius:10px;font-weight:500;font-size:0.9rem;cursor:pointer;border:1px solid var(--paper-3);background:var(--paper);color:var(--paper-ink-soft);font-family:var(--font-sans);letter-spacing:0.5px;transition:all 0.25s;">取 消</button>
+      <button id="copyOk" style="flex:1;padding:12px;border-radius:10px;font-weight:500;font-size:0.9rem;cursor:pointer;border:none;background:var(--klein);color:#fff;font-family:var(--font-sans);letter-spacing:0.5px;transition:all 0.25s;box-shadow:0 6px 18px rgba(0,47,167,0.22);">✓ 确定复制</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"><span>✅</span><span id="toastText">已复制到剪贴板</span></div>
+
+<script>
+/* ========== 1. 进度条 ========== */
+(function(){
+  const p = document.getElementById('progress');
+  function upd() {
+    const h = document.documentElement;
+    const s = h.scrollTop || document.body.scrollTop;
+    const total = h.scrollHeight - h.clientHeight;
+    p.style.width = total > 0 ? (s / total * 100) + '%' : '0%';
+  }
+  window.addEventListener('scroll', upd, { passive: true }); upd();
+})();
+
+/* ========== 1b. 返回主页恢复滚动位置（主页→内页→主页） ========== */
+/* 用户在主页滚到某位置→点击进入内页→点击返回主页时·恢复到原滚动位置 */
+(function(){
+  // 主页加载完成后·检查是否有保存的滚动位置
+  window.addEventListener('load', () => {
+    try {
+      const savedY = sessionStorage.getItem('homeScrollY');
+      if (savedY !== null) {
+        const y = parseInt(savedY, 10);
+        if (!isNaN(y) && y > 0) {
+          // 延迟一帧确保页面渲染完成
+          requestAnimationFrame(() => window.scrollTo(0, y));
+        }
+        sessionStorage.removeItem('homeScrollY');
+      }
+    } catch(e) {}
+  });
+  // 主页里所有跳转到内页(01_/02_/03_)的链接·点击时保存当前滚动位置
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest('a');
+    if (!a) return;
+    const href = a.getAttribute('href') || '';
+    if (/^(01_|02_|03_)/.test(href)) {
+      try { sessionStorage.setItem('homeScrollY', String(window.scrollY)); } catch(e) {}
+    }
+  }, true);
+})();
+
+/* ========== 2. 自定义鼠标 dot + ring ========== */
+(function(){
+  const dot = document.getElementById('cursorDot');
+  const ring = document.getElementById('cursorRing');
+  let mx = window.innerWidth/2, my = window.innerHeight/2;
+  let rx = mx, ry = my;
+
+  window.addEventListener('mousemove', (e) => {
+    mx = e.clientX; my = e.clientY;
+    dot.style.transform = `translate(${mx}px, ${my}px) translate(-50%,-50%)`;
+  }, { passive: true });
+
+  function tick() {
+    rx += (mx - rx) * 0.22;
+    ry += (my - ry) * 0.22;
+    ring.style.transform = `translate(${rx}px, ${ry}px) translate(-50%,-50%)`;
+    requestAnimationFrame(tick);
+  }
+  tick();
+
+  document.addEventListener('mouseover', (e) => {
+    if (e.target.closest('a, button, .cert-cell, .proj-card, .interest-card, .info-row, .hero-contact, .gb-submit, .gb-del, .gb-admin-toggler, .gb-admin-login, .gb-admin-logout, .btn, input, textarea, [data-copy]')) {
+      document.body.classList.add('is-hovering');
+    }
+  }, true);
+  document.addEventListener('mouseout', (e) => {
+    if (e.target.closest('a, button, .cert-cell, .proj-card, .interest-card, .info-row, .hero-contact, .gb-submit, .gb-del, .gb-admin-toggler, .gb-admin-login, .gb-admin-logout, .btn, input, textarea, [data-copy]')) {
+      document.body.classList.remove('is-hovering');
+    }
+  }, true);
+
+  document.addEventListener('mouseleave', () => { dot.style.opacity = ring.style.opacity = '0'; });
+  document.addEventListener('mouseenter', () => { dot.style.opacity = ring.style.opacity = '1'; });
+})();
+
+/* ========== 2b. 8 大字鼠标躲避（轻微位移·碰到才动） ========== */
+/* 每个 .row 根据鼠标距离反向偏移·距离越近偏移越大·最大 12px */
+(function(){
+  const rows = document.querySelectorAll('.big-title .row');
+  if (!rows.length) return;
+  const MAX_OFFSET = 12;      // 最大位移 px
+  const RANGE = 180;          // 影响范围 px（鼠标距 row 中心 180px 内才动）
+
+  let mx = -9999, my = -9999, raf = null;
+
+  function compute() {
+    raf = null;
+    rows.forEach(row => {
+      const r = row.getBoundingClientRect();
+      const cx = r.left + r.width / 2;
+      const cy = r.top + r.height / 2;
+      const dx = cx - mx;        // row 中心到鼠标的向量
+      const dy = cy - my;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist > RANGE || dist === 0) {
+        // 超出范围·复位
+        row.style.transform = '';
+        return;
+      }
+      // 影响因子·距离越近越接近 1
+      const force = (1 - dist / RANGE);
+      // 反向位移（dx/dy 为正·表示 row 在鼠标右侧/下方·应继续往右下推·即远离鼠标）
+      const ox = (dx / dist) * MAX_OFFSET * force;
+      const oy = (dy / dist) * MAX_OFFSET * force;
+      row.style.transform = `translate(${ox}px, ${oy}px)`;
+    });
+  }
+
+  window.addEventListener('mousemove', (e) => {
+    mx = e.clientX; my = e.clientY;
+    if (!raf) raf = requestAnimationFrame(compute);
+  }, { passive: true });
+
+  // 鼠标离开窗口·复位
+  document.addEventListener('mouseleave', () => {
+    rows.forEach(row => { row.style.transform = ''; });
+  });
+})();
+
+/* ========== 3. 16张证书数据 + 4×4 网格渲染 ========== */
+const CERTS = [
+  { src: 'cert.jpg.jpg',           name: '达摩院人工智能训练师初级' },
+  { src: 'ai-trainer-advanced.jpg',name: '达摩院人工智能训练师高级' },
+  { src: 'vision.png',             name: 'VISION人工智能设计入门' },
+  { src: 'AIGC.png',               name: 'PAI ArtLab AIGC设计基础' },
+  { src: 'Spring.png',             name: 'Spring AI 应用开发认证' },
+  { src: 'RAG.png',                name: 'RAG 应用构建优化认证' },
+  { src: 'blpt.png',               name: '百炼平台构建智能体' },
+  { src: 'tylm.png',               name: '通义灵码高效AI编码' },
+  { src: 'visionjj.png',           name: 'VISION 人工智能设计进阶' },
+  { src: 'prduce.png',             name: '利用大模型提升内容生产能力' },
+  { src: 'aaa.png',                name: 'AI提示师认证' },
+  { src: 'bbb.png',                name: 'AI智能体认证' },
+  { src: 'ccc.png',                name: 'AI大模型微调认证' },
+  { src: 'ddd.png',                name: 'RAG检索增强生成认证' },
+  { src: 'eee.png',                name: '玻尔Python全栈工程师认证' },
+  { src: 'fff.png',                name: '华为AI微认证' }
+];
+
+const cgrid = document.getElementById('certGrid');
+cgrid.innerHTML = CERTS.map((c, i) => `
+  <div class="cert-cell" data-idx="${i}">
+    <img class="base" src="${c.src}" alt="${c.name}" loading="lazy"
+         onerror="this.style.display='none';">
+    <img class="color" src="${c.src}" alt="${c.name}" loading="lazy"
+         onerror="this.style.display='none';">
+    <div class="badge">${String(i+1).padStart(2,'0')}</div>
+  </div>
+`).join('');
+
+/* mousemove 更新 --mx/--my 让圆形彩色跟随鼠标位置唤起 */
+cgrid.addEventListener('mousemove', (e) => {
+  const cell = e.target.closest('.cert-cell');
+  if (!cell) return;
+  const rect = cell.getBoundingClientRect();
+  const mx = ((e.clientX - rect.left) / rect.width)  * 100;
+  const my = ((e.clientY - rect.top)  / rect.height) * 100;
+  cell.style.setProperty('--mx', mx + '%');
+  cell.style.setProperty('--my', my + '%');
+});
+
+/* ========== 4. 证书查看器（左右箭头+右上×+Esc+点空白关闭） ========== */
+const viewer  = document.getElementById('certViewer');
+const vImg    = document.getElementById('certImg');
+const vIdx    = document.getElementById('certIdx');
+const vTotal   = document.getElementById('certTotal');
+const vPrev    = document.getElementById('certPrev');
+const vNext    = document.getElementById('certNext');
+const vClose   = document.getElementById('certClose');
+let vCur = 0;
+vTotal.textContent = CERTS.length;
+
+function openViewer(i) {
+  vCur = (i + CERTS.length) % CERTS.length;
+  vImg.src = CERTS[vCur].src;
+  vImg.alt = CERTS[vCur].name;
+  vIdx.textContent = vCur + 1;
+  viewer.classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+function closeViewer() {
+  viewer.classList.remove('show');
+  document.body.style.overflow = '';
+}
+function nav(d) {
+  vCur = (vCur + d + CERTS.length) % CERTS.length;
+  vImg.src = CERTS[vCur].src;
+  vImg.alt = CERTS[vCur].name;
+  vIdx.textContent = vCur + 1;
+}
+cgrid.addEventListener('click', e => {
+  const cell = e.target.closest('.cert-cell');
+  if (cell) openViewer(parseInt(cell.dataset.idx, 10));
+});
+vPrev.addEventListener('click', () => nav(-1));
+vNext.addEventListener('click', () => nav(1));
+vClose.addEventListener('click', closeViewer);
+viewer.addEventListener('click', e => { if (e.target === viewer) closeViewer(); });
+document.addEventListener('keydown', e => {
+  if (!viewer.classList.contains('show')) return;
+  if (e.key === 'Escape') closeViewer();
+  if (e.key === 'ArrowLeft') nav(-1);
+  if (e.key === 'ArrowRight') nav(1);
+});
+
+/* ========== 5. 联系方式复制（Hero 3 按钮） ========== */
+const C = {
+  tel:  { label: '电话号码', value: '17516573576',         ico: '✆'  },
+  mail: { label: '电子邮箱', value: 'lwq657756a99@qq.com',  ico: '📧' },
+  wx:   { label: '微信号',   value: 'wwwww4657',            ico: '📱' }
+};
+const mask = document.getElementById('copyMask');
+const dlg = document.getElementById('copyDlg');
+const vIco = document.getElementById('copyIco');
+const vType = document.getElementById('copyType');
+const vVal = document.getElementById('copyVal');
+const toast = document.getElementById('toast');
+const tText = document.getElementById('toastText');
+let pending = null;
+
+function openCopy(key) {
+  const c = C[key]; if(!c) return; pending = c;
+  vIco.textContent = c.ico;
+  vType.textContent = c.label;
+  vVal.textContent = c.value;
+  mask.classList.add('show');
+}
+function closeCopy() { mask.classList.remove('show'); pending = null; }
+function showToast(html) {
+  tText.innerHTML = html;
+  toast.classList.add('show');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => toast.classList.remove('show'), 2400);
+}
+document.querySelectorAll('[data-copy]').forEach(b => {
+  b.addEventListener('click', () => openCopy(b.dataset.copy));
+});
+mask.addEventListener('click', e => { if (e.target === mask) closeCopy(); });
+document.getElementById('copyCancel').addEventListener('click', closeCopy);
+document.getElementById('copyOk').addEventListener('click', async () => {
+  if (!pending) return;
+  let ok = false;
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(pending.value); ok = true;
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = pending.value; ta.style.position = 'fixed'; ta.style.left = '-9999px';
+      document.body.appendChild(ta); ta.select();
+      ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+  } catch (e) { ok = false; }
+  closeCopy();
+  showToast(ok
+    ? `✅ 已复制${pending.label}：<b style='color:var(--klein)'>${pending.value}</b>`
+    : '❌ 复制失败，请手动选择复制');
+});
+
+/* 全局 Esc */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    if (mask.classList.contains('show')) closeCopy();
+    const ab = document.getElementById('gbAdminBox');
+    if (ab && ab.classList.contains('show')) ab.classList.remove('show');
+  }
+});
+
+/* ========== 6. 留言板 GUEST BOOK（永久保存·作者本人+管理员双权限删除·显示年月日时分） ========== */
+(function(){
+  /* —— 👇 站点管理员（=你本人）专属密码，可自行改成任意密码 —— */
+  const ADMIN_PWD = '657550';
+
+  const LS_KEY   = '方案八_guestbook_v2';     /* v2 新版留言板 */
+  const LS_ME     = '方案八_guestbook_me';
+  const SS_ADMIN  = '方案八_guestbook_admin';
+  const MAX_NICK    = 24;
+  const MAX_TOPIC   = 40;
+  const MAX_CONTENT = 800;
+
+  const $nick   = document.getElementById('gbNick');
+  const $topic  = document.getElementById('gbTopic');
+  const $cont   = document.getElementById('gbContent');
+  const $subBtn = document.getElementById('gbSubmit');
+  const $list   = document.getElementById('gbList');
+  const $count  = document.getElementById('gbCount');
+  const $adTog  = document.getElementById('gbAdminToggler');
+  const $adBox  = document.getElementById('gbAdminBox');
+  const $pwd    = document.getElementById('gbPwd');
+  const $adSt   = document.getElementById('gbAdminSt');
+  const $adIn   = document.getElementById('gbAdminLogin');
+  const $adOut  = document.getElementById('gbAdminLogout');
+
+  /* 作者UUID（同一浏览器永久不变） */
+  let me = localStorage.getItem(LS_ME);
+  if (!me || me.length < 8) {
+    me = 'u_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+    localStorage.setItem(LS_ME, me);
+  }
+
+  function readMsgs(){ try { return JSON.parse(localStorage.getItem(LS_KEY) || '[]') || []; } catch(e){ return []; } }
+  function saveMsgs(arr){ localStorage.setItem(LS_KEY, JSON.stringify(arr)); }
+
+  function isAdmin(){ return sessionStorage.getItem(SS_ADMIN) === '1'; }
+  function setAdmin(on){
+    if (on) { sessionStorage.setItem(SS_ADMIN, '1'); }
+    else    { sessionStorage.removeItem(SS_ADMIN); }
+    $adSt.textContent = on ? '已登录·可删全部' : '未登录';
+    $adSt.className = 'gb-admin-st ' + (on ? 'on' : 'off');
+    $adIn.style.display  = on ? 'none' : 'inline-flex';
+    $adOut.style.display = on ? 'inline-flex' : 'none';
+    $pwd.style.display   = on ? 'none' : 'block';
+    render();
+  }
+
+  function escapeAttr(s){ return String(s || '').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  /* 完整年月日时分秒显示 */
+  function fmtTime(ts){
+    const d = new Date(ts);
+    const p = n => String(n).padStart(2,'0');
+    return `${d.getFullYear()}年${p(d.getMonth()+1)}月${p(d.getDate())}日 ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+  }
+
+  function render(){
+    const arr   = readMsgs();
+    const admin = isAdmin();
+    $count.innerHTML =
+      `<strong>${arr.length}</strong> 条留言 · ${arr.length === 0 ? '期待你的第一条 ✨' : '欢迎友善交流 💬'}` +
+      ` <span class="tiff">· 最新显示在最上面</span>`;
+
+    $list.innerHTML = '';
+    if (arr.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'gb-empty';
+      empty.innerHTML = `还没有任何留言 · 来做<strong>第一位留言的人</strong>吧 🖋️`;
+      $list.appendChild(empty);
+      return;
+    }
+
+    arr.slice().reverse().forEach((m, idx) => {
+      const item = document.createElement('div');
+      item.className = 'gb-item';
+      item.dataset.msgId = m.id;
+
+      const head = document.createElement('div');
+      head.className = 'gb-item-head';
+      const nickWrap = document.createElement('div');
+      nickWrap.className = 'gb-nick';
+      const nickText = document.createElement('span');
+      nickText.textContent = (m.nick || '匿名访客').substring(0, MAX_NICK);
+      nickWrap.appendChild(nickText);
+      if (m.author === me) {
+        const t1 = document.createElement('span');
+        t1.className = 'tag self'; t1.textContent = '我发的';
+        nickWrap.appendChild(t1);
+      }
+      if (m.topic && m.topic.trim()) {
+        const t2 = document.createElement('span');
+        t2.className = 'tag self';
+        t2.style.background = 'rgba(0,47,167,0.06)';
+        t2.style.color      = 'var(--klein)';
+        t2.style.borderColor= 'rgba(0,47,167,0.18)';
+        t2.textContent = '# ' + m.topic.trim().substring(0, MAX_TOPIC);
+        nickWrap.appendChild(t2);
+      }
+      const time = document.createElement('div');
+      time.className = 'gb-time';
+      time.textContent = fmtTime(m.ts);
+      head.appendChild(nickWrap);
+      head.appendChild(time);
+      item.appendChild(head);
+
+      const body = document.createElement('div');
+      body.className = 'gb-content';
+      body.textContent = (m.content || '').substring(0, MAX_CONTENT);
+      item.appendChild(body);
+
+      // 权限：仅管理员可删除任何留言；作者本人也不可删除
+      if (admin) {
+        const del = document.createElement('button');
+        del.className = 'gb-del';
+        del.type = 'button';
+        del.dataset.delId = m.id;
+        del.title = `管理员删除（第${idx+1}条）`;
+        del.textContent = '×';
+        del.addEventListener('click', () => {
+          const ok = window.confirm(`确定要以「管理员」身份删除第 ${idx+1} 条留言吗？\n\n—— 昵称：${escapeAttr(m.nick||'匿名')}\n—— 内容：${escapeAttr((m.content||'').slice(0,80))}${m.content && m.content.length>80?'...':''}`);
+          if (!ok) return;
+          const cur = readMsgs();
+          const next = cur.filter(x => x.id !== m.id);
+          saveMsgs(next);
+          showToast(`🗑️ 已以管理员身份删除一条留言`);
+          render();
+        });
+        item.appendChild(del);
+      }
+
+      $list.appendChild(item);
+    });
+  }
+
+  function sendMsg(){
+    const nick   = ($nick.value || '').trim();
+    const topic  = ($topic.value || '').trim();
+    const content= ($cont.value || '').trim();
+    if (!nick)     { showToast('⚠️ 请先填写你的「身份标识·昵称」'); $nick.focus(); return; }
+    if (!content)  { showToast('⚠️ 「想说的话」不能为空哦'); $cont.focus(); return; }
+    if (nick.length > MAX_NICK)        { showToast(`⚠️ 昵称最多${MAX_NICK}字`); return; }
+    if (topic.length > MAX_TOPIC)      { showToast(`⚠️ 话题最多${MAX_TOPIC}字`); return; }
+    if (content.length > MAX_CONTENT)  { showToast(`⚠️ 内容最多${MAX_CONTENT}字`); return; }
+    const msgs = readMsgs();
+    const newMsg = {
+      id:     'm_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8),
+      nick:   nick.substring(0, MAX_NICK),
+      topic:  topic.substring(0, MAX_TOPIC),
+      content:content.substring(0, MAX_CONTENT),
+      ts:     Date.now(),
+      author: me
+    };
+    msgs.push(newMsg);
+    saveMsgs(msgs);
+    $cont.value = ''; $topic.value = '';
+    render();
+    showToast(`💌 留言发送成功 · 共 <b style='color:var(--klein)'>${msgs.length}</b> 条 · 永久保存`);
+    setTimeout(() => {
+      const items = $list.querySelectorAll('.gb-item');
+      if (items.length) items[items.length-1].scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }, 80);
+  }
+
+  $adTog.addEventListener('click', () => {
+    $adBox.classList.toggle('show');
+    if ($adBox.classList.contains('show')) setTimeout(() => $pwd.focus(), 50);
+  });
+  $adIn.addEventListener('click', () => {
+    if ($pwd.value === ADMIN_PWD) {
+      setAdmin(true);
+      $adBox.classList.remove('show');
+      showToast(`🔓 管理员登录成功 · 现在每条留言右上角都会显示「删除」按钮`);
+    } else {
+      showToast(`❌ 管理员密码错误`);
+      $pwd.select(); $pwd.focus();
+    }
+  });
+  $adOut.addEventListener('click', () => {
+    setAdmin(false);
+    showToast(`🔒 已退出管理员模式`);
+  });
+  $pwd.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $adIn.click(); }});
+
+  $subBtn.addEventListener('click', sendMsg);
+  $nick.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $cont.focus(); }});
+  $cont.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); sendMsg(); }
+  });
+
+  setAdmin(isAdmin());
+  render();
+})();
+</script>
+</body>
+</html>
