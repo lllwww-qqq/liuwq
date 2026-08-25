@@ -1760,12 +1760,36 @@ document.addEventListener('keydown', e => {
   }
 });
 
-/* ========== 6. 留言板 GUEST BOOK（永久保存·作者本人+管理员双权限删除·显示年月日时分） ========== */
-(function(){
+/* ========== 6. 留言板 GUEST BOOK（GitHub 云端存储·跨设备同步·管理员删除） ========== */
+(async function(){
   /* —— 👇 站点管理员（=你本人）专属密码，可自行改成任意密码 —— */
   const ADMIN_PWD = '657550';
 
-  const LS_KEY   = '方案八_guestbook_v2';     /* v2 新版留言板 */
+  /* —— 从 config.json 读取 GitHub 配置 —— */
+  let GH_CONFIG = {
+    owner: 'lllwww-qqq',
+    repo: 'liuwq',
+    path: 'messages.json',
+    branch: 'main',
+    token: ''
+  };
+  try {
+    const configResp = await fetch('config.json');
+    if (configResp.ok) {
+      const config = await configResp.json();
+      if (config.github) {
+        GH_CONFIG.owner = config.github.owner || GH_CONFIG.owner;
+        GH_CONFIG.repo = config.github.repo || GH_CONFIG.repo;
+        GH_CONFIG.token = config.github.token || GH_CONFIG.token;
+        GH_CONFIG.path = config.github.messagesPath || GH_CONFIG.path;
+        GH_CONFIG.branch = config.github.branch || GH_CONFIG.branch;
+      }
+    }
+  } catch (e) {
+    console.warn('无法加载 config.json，使用默认配置', e);
+  }
+
+  const LS_KEY   = '方案八_guestbook_v2';     /* 离线备份 */
   const LS_ME     = '方案八_guestbook_me';
   const SS_ADMIN  = '方案八_guestbook_admin';
   const MAX_NICK    = 24;
@@ -1792,8 +1816,75 @@ document.addEventListener('keydown', e => {
     localStorage.setItem(LS_ME, me);
   }
 
-  function readMsgs(){ try { return JSON.parse(localStorage.getItem(LS_KEY) || '[]') || []; } catch(e){ return []; } }
-  function saveMsgs(arr){ localStorage.setItem(LS_KEY, JSON.stringify(arr)); }
+  /* —— GitHub API 封装 —— */
+  let _fileSha = null;   /* 缓存文件 SHA，用于更新 */
+
+  async function ghFetch(path, options = {}) {
+    const url = `https://api.github.com/repos/${GH_CONFIG.owner}/${GH_CONFIG.repo}/contents/${path}?ref=${GH_CONFIG.branch}`;
+    const opts = {
+      ...options,
+      headers: {
+        'Authorization': `token ${GH_CONFIG.token}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json',
+        ...(options.headers || {})
+      }
+    };
+    const res = await fetch(url, opts);
+    if (!res.ok) throw new Error(`GitHub API error: ${res.status}`);
+    return res.json();
+  }
+
+  async function readMsgs() {
+    try {
+      const data = await ghFetch(GH_CONFIG.path);
+      _fileSha = data.sha;
+      const content = decodeURIComponent(escape(atob(data.content)));
+      const arr = JSON.parse(content);
+      localStorage.setItem(LS_KEY, JSON.stringify(arr)); /* 缓存到本地 */
+      return arr;
+    } catch (e) {
+      console.warn('GitHub 读取失败，使用本地缓存', e);
+      try { return JSON.parse(localStorage.getItem(LS_KEY) || '[]') || []; } catch { return []; }
+    }
+  }
+
+  async function saveMsgs(arr) {
+    try {
+      const content = btoa(unescape(encodeURIComponent(JSON.stringify(arr))));
+      const sha = _fileSha || (await (async () => {
+        const d = await ghFetch(GH_CONFIG.path);
+        return d.sha;
+      })());
+      const body = {
+        message: `update guestbook at ${new Date().toISOString()}`,
+        content: content,
+        branch: GH_CONFIG.branch,
+        sha: sha
+      };
+      const res = await fetch(
+        `https://api.github.com/repos/${GH_CONFIG.owner}/${GH_CONFIG.repo}/contents/${GH_CONFIG.path}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Authorization': `token ${GH_CONFIG.token}`,
+            'Accept': 'application/vnd.github.v3+json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(body)
+        }
+      );
+      if (!res.ok) throw new Error(`GitHub 写入失败: ${res.status}`);
+      const result = await res.json();
+      _fileSha = result.content.sha;
+      localStorage.setItem(LS_KEY, JSON.stringify(arr)); /* 缓存到本地 */
+      return true;
+    } catch (e) {
+      console.warn('GitHub 写入失败，使用本地缓存', e);
+      localStorage.setItem(LS_KEY, JSON.stringify(arr));
+      return false;
+    }
+  }
 
   function isAdmin(){ return sessionStorage.getItem(SS_ADMIN) === '1'; }
   function setAdmin(on){
@@ -1804,7 +1895,7 @@ document.addEventListener('keydown', e => {
     $adIn.style.display  = on ? 'none' : 'inline-flex';
     $adOut.style.display = on ? 'inline-flex' : 'none';
     $pwd.style.display   = on ? 'none' : 'block';
-    render();
+    render();  /* async */
   }
 
   function escapeAttr(s){ return String(s || '').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
@@ -1815,8 +1906,8 @@ document.addEventListener('keydown', e => {
     return `${d.getFullYear()}年${p(d.getMonth()+1)}月${p(d.getDate())}日 ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
   }
 
-  function render(){
-    const arr   = readMsgs();
+  async function render(){
+    const arr   = await readMsgs();
     const admin = isAdmin();
     $count.innerHTML =
       `<strong>${arr.length}</strong> 条留言 · ${arr.length === 0 ? '期待你的第一条 ✨' : '欢迎友善交流 💬'}` +
@@ -1869,7 +1960,7 @@ document.addEventListener('keydown', e => {
       body.textContent = (m.content || '').substring(0, MAX_CONTENT);
       item.appendChild(body);
 
-      // 权限：仅管理员可删除任何留言；作者本人也不可删除
+      // 权限：仅管理员可删除任何留言
       if (admin) {
         const del = document.createElement('button');
         del.className = 'gb-del';
@@ -1877,14 +1968,14 @@ document.addEventListener('keydown', e => {
         del.dataset.delId = m.id;
         del.title = `管理员删除（第${idx+1}条）`;
         del.textContent = '×';
-        del.addEventListener('click', () => {
+        del.addEventListener('click', async () => {
           const ok = window.confirm(`确定要以「管理员」身份删除第 ${idx+1} 条留言吗？\n\n—— 昵称：${escapeAttr(m.nick||'匿名')}\n—— 内容：${escapeAttr((m.content||'').slice(0,80))}${m.content && m.content.length>80?'...':''}`);
           if (!ok) return;
-          const cur = readMsgs();
+          const cur = await readMsgs();
           const next = cur.filter(x => x.id !== m.id);
-          saveMsgs(next);
-          showToast(`🗑️ 已以管理员身份删除一条留言`);
-          render();
+          const okSave = await saveMsgs(next);
+          showToast(okSave ? '🗑️ 已以管理员身份删除一条留言' : '⚠️ 本地已删除，云端可能未同步');
+          await render();
         });
         item.appendChild(del);
       }
@@ -1893,7 +1984,7 @@ document.addEventListener('keydown', e => {
     });
   }
 
-  function sendMsg(){
+  async function sendMsg(){
     const nick   = ($nick.value || '').trim();
     const topic  = ($topic.value || '').trim();
     const content= ($cont.value || '').trim();
@@ -1902,24 +1993,35 @@ document.addEventListener('keydown', e => {
     if (nick.length > MAX_NICK)        { showToast(`⚠️ 昵称最多${MAX_NICK}字`); return; }
     if (topic.length > MAX_TOPIC)      { showToast(`⚠️ 话题最多${MAX_TOPIC}字`); return; }
     if (content.length > MAX_CONTENT)  { showToast(`⚠️ 内容最多${MAX_CONTENT}字`); return; }
-    const msgs = readMsgs();
-    const newMsg = {
-      id:     'm_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8),
-      nick:   nick.substring(0, MAX_NICK),
-      topic:  topic.substring(0, MAX_TOPIC),
-      content:content.substring(0, MAX_CONTENT),
-      ts:     Date.now(),
-      author: me
-    };
-    msgs.push(newMsg);
-    saveMsgs(msgs);
-    $cont.value = ''; $topic.value = '';
-    render();
-    showToast(`💌 留言发送成功 · 共 <b style='color:var(--klein)'>${msgs.length}</b> 条 · 永久保存`);
-    setTimeout(() => {
-      const items = $list.querySelectorAll('.gb-item');
-      if (items.length) items[items.length-1].scrollIntoView({ behavior: 'smooth', block: 'end' });
-    }, 80);
+    $subBtn.disabled = true;
+    $subBtn.textContent = '发送中...';
+    try {
+      const msgs = await readMsgs();
+      const newMsg = {
+        id:     'm_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8),
+        nick:   nick.substring(0, MAX_NICK),
+        topic:  topic.substring(0, MAX_TOPIC),
+        content:content.substring(0, MAX_CONTENT),
+        ts:     Date.now(),
+        author: me
+      };
+      msgs.push(newMsg);
+      const ok = await saveMsgs(msgs);
+      $cont.value = ''; $topic.value = '';
+      await render();
+      showToast(ok
+        ? `💌 留言发送成功 · 共 <b style='color:var(--klein)'>${msgs.length}</b> 条 · 云端永久保存`
+        : `💌 留言已保存（云端暂不可用，本地有备份）`);
+      setTimeout(() => {
+        const items = $list.querySelectorAll('.gb-item');
+        if (items.length) items[0].scrollIntoView({ behavior: 'smooth', block: 'end' });
+      }, 80);
+    } catch (e) {
+      showToast('❌ 发送失败，请稍后重试');
+    } finally {
+      $subBtn.disabled = false;
+      $subBtn.textContent = '⏎ 发送留言';
+    }
   }
 
   $adTog.addEventListener('click', () => {
