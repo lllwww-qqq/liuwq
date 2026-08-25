@@ -1843,7 +1843,9 @@ document.addEventListener('keydown', e => {
     try {
       const data = await ghFetch(GH_CONFIG.path);
       _fileSha = data.sha;
-      const content = decodeURIComponent(escape(atob(data.content)));
+      /* GitHub 返回的 base64 包含换行符，需要清理 */
+      const cleanBase64 = data.content.replace(/\n/g, '').replace(/\r/g, '');
+      const content = decodeURIComponent(escape(atob(cleanBase64)));
       const arr = JSON.parse(content);
       localStorage.setItem(LS_KEY, JSON.stringify(arr)); /* 缓存到本地 */
       return arr;
