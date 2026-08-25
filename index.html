@@ -1834,6 +1834,7 @@ document.addEventListener('keydown', e => {
         ...(options.headers || {})
       }
     };
+    console.log('ghFetch URL:', url, 'Token length:', GH_CONFIG.token.length);
     const res = await fetch(url, opts);
     if (!res.ok) throw new Error(`GitHub API error: ${res.status}`);
     return res.json();
@@ -1841,13 +1842,17 @@ document.addEventListener('keydown', e => {
 
   async function readMsgs() {
     try {
+      console.log('readMsgs start...');
       const data = await ghFetch(GH_CONFIG.path);
+      console.log('readMsgs data received, sha:', data.sha);
       _fileSha = data.sha;
       /* GitHub 返回的 base64 包含换行符，需要清理 */
       const cleanBase64 = data.content.replace(/\n/g, '').replace(/\r/g, '');
       const content = decodeURIComponent(escape(atob(cleanBase64)));
+      console.log('readMsgs content:', content.slice(0, 100));
       const arr = JSON.parse(content);
       localStorage.setItem(LS_KEY, JSON.stringify(arr)); /* 缓存到本地 */
+      console.log('readMsgs success, count:', arr.length);
       return arr;
     } catch (e) {
       console.warn('GitHub 读取失败，使用本地缓存', e);
